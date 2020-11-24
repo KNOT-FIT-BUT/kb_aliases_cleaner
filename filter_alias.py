@@ -32,12 +32,12 @@ if __name__ == '__main__':
 
     for option, value in optlist:
         if option == '-h':
-            print("./filter_alias [-h][-d][-t THRESHOLD][-k PATH_TO_KB]")
+            print("./filter_alias [options]")
             print("\t-h\t- Shows help")
             print("\t-d\t- Debug mode")
-            print("\t-t\t- Expects you to provide new THRESHOLD value")
-            print("\t--input-file\t- Expects you to provide path to input KB")
-            print("\t--output-file\t- Expects you to provide path to output KB")
+            print("\t-t\t- Expects you to provide new THRESHOLD value (implicitly 2)")
+            print("\t--input-file\t- Expects you to provide path to input KB (implicitly ./KB.all)")
+            print("\t--output-file\t- Expects you to provide path to output KB (implicitly ./KB.all)")
             exit()
         elif option == '-d':
             DEBUG = True
