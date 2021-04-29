@@ -8,6 +8,7 @@ usage() {
     echo "	--debug - Start in debug mode (generate files like aliases.txt, aliases_match.tsv)"
 	echo "	--input-file - set path to input KB (default is KB.tsv in current directory)"
 	echo "	--output-file - set path to output KB (default is KB.tsv in current directory)"
+    exit 0
 }
 
 KB_URL=http://knot.fit.vutbr.cz/NAKI_CPK/NER_ML_inputs/KB/KB_cs/new/KB.tsv
@@ -18,7 +19,7 @@ PATH_TO_KB=unset
 OUTPUT_FILE=unset
 DOWNLOAD_KB=false
 
-PARSED_ARGS=$(getopt -a -n run_filter_alias -o hkdt: --long debug;input-file:,output-file: -- "$@")
+PARSED_ARGS=$(getopt -a -n run_filter_alias -o hkt: --long debug,input-file:,output-file: -- "$@")
 VALID_ARGS=$?
 if [ "$VALID_ARGS" != "0" ]; then
 	usage
@@ -29,9 +30,9 @@ eval set -- "$PARSED_ARGS"
 while :
 do
 	case "$1" in 
-		-h) usage exit	; shift	;;
+		-h) usage; shift	;;
 		-k) DOWNLOAD_KB=true	; shift	;;
-		-debug) DEBUG="-d"	; shift	;;
+		--debug) DEBUG="--debug"	; shift	;;
 		-t) THRESHOLD="-t "$2 ; shift 2	;;
 		--input-file) PATH_TO_KB="--input-file "$2	; shift 2	;;
 		--output-file) OUTPUT_FILE="--output-file "$2	; shift 2	;;
