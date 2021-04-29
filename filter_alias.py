@@ -28,18 +28,19 @@ if __name__ == '__main__':
     OUTPUT_PATH = './KB.tsv'
 
     args = sys.argv[1:]
-    optlist, args = getopt.getopt(args, 'hdt:', ['input-file=', 'output-file='])
+    lopts = ['debug', 'input-file=', 'output-file=']
+    optlist, args = getopt.getopt(args, 'hdt:', lopts)
 
     for option, value in optlist:
         if option == '-h':
             print("./filter_alias [options]")
             print("\t-h\t- Shows help")
-            print("\t-d\t- Debug mode")
             print("\t-t\t- Expects you to provide new THRESHOLD value (implicitly 2)")
+            print("\t--debug\t- Debug mode")
             print("\t--input-file\t- Expects you to provide path to input KB (implicitly ./KB.all)")
             print("\t--output-file\t- Expects you to provide path to output KB (implicitly ./KB.all)")
             exit()
-        elif option == '-d':
+        elif option == '--debug':
             DEBUG = True
         elif option == '-t':
             THRESHOLD = int(value)

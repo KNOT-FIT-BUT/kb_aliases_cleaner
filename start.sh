@@ -3,9 +3,9 @@
 usage() {
 	echo "Usage $0 [ -h ][ -d ][ -k ][ -t THRESHOLD ][ --input-file FILE ][ --output-file FILE ]"
 	echo "	-h - Prints out usage of program"
-	echo "	-d - Start in debug mode (generate files like aliases.txt, aliases_match.tsv"
 	echo "	-k - download the KB, disablexs PATH_TO_KB argument"
 	echo "	-t THRESHOLD - set new threshold for filtering aliases (number of matches)"
+    echo "	--debug - Start in debug mode (generate files like aliases.txt, aliases_match.tsv)"
 	echo "	--input-file - set path to input KB (default is KB.tsv in current directory)"
 	echo "	--output-file - set path to output KB (default is KB.tsv in current directory)"
 }
@@ -18,7 +18,7 @@ PATH_TO_KB=unset
 OUTPUT_FILE=unset
 DOWNLOAD_KB=false
 
-PARSED_ARGS=$(getopt -a -n run_filter_alias -o hkdt: --long input-file:,output-file: -- "$@")
+PARSED_ARGS=$(getopt -a -n run_filter_alias -o hkdt: --long debug;input-file:,output-file: -- "$@")
 VALID_ARGS=$?
 if [ "$VALID_ARGS" != "0" ]; then
 	usage
@@ -31,7 +31,7 @@ do
 	case "$1" in 
 		-h) usage exit	; shift	;;
 		-k) DOWNLOAD_KB=true	; shift	;;
-		-d) DEBUG="-d"	; shift	;;
+		-debug) DEBUG="-d"	; shift	;;
 		-t) THRESHOLD="-t "$2 ; shift 2	;;
 		--input-file) PATH_TO_KB="--input-file "$2	; shift 2	;;
 		--output-file) OUTPUT_FILE="--output-file "$2	; shift 2	;;
