@@ -10,6 +10,7 @@ usage() {
 	echo "	--output-file - set path to output KB (default is KB.tsv in current directory)"
 }
 
+KB_URL=http://knot.fit.vutbr.cz/NAKI_CPK/NER_ML_inputs/KB/KB_cs/new/KB.tsv
 DEBUG=""
 PATH_KB=0
 THRESHOLD=
@@ -47,14 +48,14 @@ if [[ "$DOWNLOAD_KB" == true && $PATH_TO_KB != unset ]]; then
 	if [ -e "KB.tsv" ]; then
 		rm "KB.tsv"
 	fi
-	wget http://knot.fit.vutbr.cz/NAKI_CPK/NER_ML_inputs/KB/KB_cs/KB_cs_20200801-1597308491/KB.tsv &> /dev/null
+	wget "$KB_URL" &> /dev/null
 	PATH_TO_KB="--input-file "$PWD"/KB.tsv"
 elif [ "$DOWNLOAD_KB" == true ]; then
 	echo "[*] Downloading the KB"
 	if [ -e "KB.tsv" ]; then
 		rm "KB.tsv"
 	fi
-	wget http://knot.fit.vutbr.cz/NAKI_CPK/NER_ML_inputs/KB/KB_cs/KB_cs_20200801-1597308491/KB.tsv &> /dev/null
+	wget "$KB_URL" &> /dev/null
 	PATH_TO_KB="--input-file "$PWD"/KB.tsv"
 fi
 
