@@ -5,6 +5,7 @@ usage() {
 	echo "	-h - Prints out usage of program"
 	echo "	-k - download the KB, disablexs PATH_TO_KB argument"
 	echo "	-t THRESHOLD - set new threshold for filtering aliases (number of matches)"
+    echo "	--destoy - aliases are not marked but destroyed"
     echo "	--debug - Start in debug mode (generate files like aliases.txt, aliases_match.tsv)"
 	echo "	--input-file - set path to input KB (default is KB.tsv in current directory)"
 	echo "	--output-file - set path to output KB (default is KB.tsv in current directory)"
@@ -13,13 +14,14 @@ usage() {
 
 KB_URL=http://knot.fit.vutbr.cz/NAKI_CPK/NER_ML_inputs/KB/KB_cs/new/KB.tsv
 DEBUG=""
+DESTROY=""
 PATH_KB=0
 THRESHOLD=
 PATH_TO_KB=unset
 OUTPUT_FILE=unset
 DOWNLOAD_KB=false
 
-PARSED_ARGS=$(getopt -a -n run_filter_alias -o hkt: --long debug,input-file:,output-file: -- "$@")
+PARSED_ARGS=$(getopt -a -n run_filter_alias -o hkt: --long destroy,debug,input-file:,output-file: -- "$@")
 VALID_ARGS=$?
 if [ "$VALID_ARGS" != "0" ]; then
 	usage
@@ -32,6 +34,7 @@ do
 	case "$1" in 
 		-h) usage; shift	;;
 		-k) DOWNLOAD_KB=true	; shift	;;
+		--destroy) DESTROY="--destroy"	; shift	;;
 		--debug) DEBUG="--debug"	; shift	;;
 		-t) THRESHOLD="-t "$2 ; shift 2	;;
 		--input-file) PATH_TO_KB="--input-file "$2	; shift 2	;;
@@ -61,7 +64,7 @@ elif [ "$DOWNLOAD_KB" == true ]; then
 fi
 
 echo "[*] Starting filter_alias.py"
-./filter_alias.py $DEBUG $THRESHOLD $PATH_TO_KB $OUTPUT_FILE
+./filter_alias.py $DEBUG $DESTROY $THRESHOLD $PATH_TO_KB $OUTPUT_FILE
 echo "[*] Cleaning up"
 if [ -e "num_aliases.tsv" ]; then
 	rm "num_aliases.tsv"

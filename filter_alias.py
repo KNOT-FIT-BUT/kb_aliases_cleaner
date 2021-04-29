@@ -18,17 +18,24 @@ import src.destroy_alias as destroy_alias
 from src.destroy_alias import TARGETS, GN_NAMES, POS_ALIAS
 from src.match_alias import KB_HEAD
 
+def mark_aliases(arr, targets):
+    for i in range(len(arr)):
+        if arr[i].split('#')[0] in targets:
+            arr[i] = arr[i] + "#mark=deleted"
+    return arr
+
 if __name__ == '__main__':
     match_dict = dict()
     alias_dict = dict()
 
     THRESHOLD = 2
     DEBUG = False
+    DESTROY = False
     KB_PATH = './KB.tsv'
     OUTPUT_PATH = './KB.tsv'
 
     args = sys.argv[1:]
-    lopts = ['debug', 'input-file=', 'output-file=']
+    lopts = ['destroy', 'debug', 'input-file=', 'output-file=']
     optlist, args = getopt.getopt(args, 'hdt:', lopts)
 
     for option, value in optlist:
@@ -36,12 +43,15 @@ if __name__ == '__main__':
             print("./filter_alias [options]")
             print("\t-h\t- Shows help")
             print("\t-t\t- Expects you to provide new THRESHOLD value (implicitly 2)")
+            print("\t--destroy\t- Destructable mode")
             print("\t--debug\t- Debug mode")
             print("\t--input-file\t- Expects you to provide path to input KB (implicitly ./KB.all)")
             print("\t--output-file\t- Expects you to provide path to output KB (implicitly ./KB.all)")
             exit()
         elif option == '--debug':
             DEBUG = True
+        elif option == '--destroy':
+            DESTROY = True
         elif option == '-t':
             THRESHOLD = int(value)
         elif option == '--input-file':
@@ -93,8 +103,11 @@ if __name__ == '__main__':
         line = KB_lines[num]
         line = line.split('\t')
         aliases = line[POS_ALIAS].split('|')
-        aliases = filter(lambda name: not (name.split('#')[0] in targets),
-                         aliases)
+        if DESTROY == True:
+            aliases = filter(lambda name: not (name.split('#')[0] in targets),
+                             aliases)
+        else:
+            aliases = mark_aliases(aliases, targets)
         line[POS_ALIAS] = '|'.join(list(aliases))
         KB.write('\t'.join(line))
 
