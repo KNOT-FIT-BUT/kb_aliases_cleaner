@@ -64,7 +64,7 @@ elif [ "$DOWNLOAD_KB" == true ]; then
 fi
 
 echo "[*] Starting filter_alias.py"
-./filter_alias.py $DEBUG $DESTROY $THRESHOLD $PATH_TO_KB $OUTPUT_FILE
+`dirname $0`/filter_alias.py $DEBUG $DESTROY $THRESHOLD $PATH_TO_KB $OUTPUT_FILE
 echo "[*] Cleaning up"
 if [ -e "num_aliases.tsv" ]; then
 	rm "num_aliases.tsv"

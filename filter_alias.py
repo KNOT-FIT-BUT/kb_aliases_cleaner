@@ -42,11 +42,11 @@ if __name__ == '__main__':
         if option == '-h':
             print("./filter_alias [options]")
             print("\t-h\t- Shows help")
-            print("\t-t\t- Expects you to provide new THRESHOLD value (implicitly 2)")
+            print(f"\t-t\t- Expects you to provide new THRESHOLD value (implicitly {THRESHOLD})")
             print("\t--destroy\t- Destructable mode")
             print("\t--debug\t- Debug mode")
-            print("\t--input-file\t- Expects you to provide path to input KB (implicitly ./KB.all)")
-            print("\t--output-file\t- Expects you to provide path to output KB (implicitly ./KB.all)")
+            print(f"\t--input-file\t- Expects you to provide path to input KB (implicitly {KB_PATH})")
+            print(f"\t--output-file\t- Expects you to provide path to output KB (implicitly {OUTPUT_PATH})")
             exit()
         elif option == '--debug':
             DEBUG = True
@@ -77,10 +77,10 @@ if __name__ == '__main__':
 
     # Using namegen to determinate targets
     print('[*] Starting prep_namegen.py')
-    subprocess.call('./src/prep_namegen.py')
+    subprocess.call(f'{os.getcwd()}/src/prep_namegen.py')
     print('[*] Starting namegen and generating names')
     FNULL = open(os.devnull, 'w')
-    subprocess.call(['./namegen/namegen.py', '-gn', 'namegen_gn_output.txt',
+    subprocess.call([f'{os.getcwd()}/namegen/namegen.py', '-gn', 'namegen_gn_output.txt',
                          'namegen_input.txt'], stdout=FNULL,
                          stderr=subprocess.STDOUT)
 
