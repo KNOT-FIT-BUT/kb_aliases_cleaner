@@ -37,7 +37,7 @@ class Filter(ABC):
     def __call__(self, o: Any) -> bool:
         """
         Volání filtru
-        
+
         :param o: objekt pro filtrování
         :type o: Any
         :return: True pokud má být objekt o propuštěn filtrem. False pokud má být odfiltrován.
@@ -54,7 +54,7 @@ class NameLanguagesFilter(Filter):
     def __init__(self, languages: Set[str]):
         """
         Inicializace filtru.
-        
+
         :param languages: Povolené jazyky.
         :type languages: Set[str]
         """
@@ -64,7 +64,7 @@ class NameLanguagesFilter(Filter):
     def __call__(self, o) -> bool:
         """
         Volání filtru
-        
+
         :param o: jméno pro filtrování
         :type o: Name
         :return: True pokud má být jméno o propuštěno filtrem. False pokud má být odfiltrováno.
@@ -82,7 +82,7 @@ class NameRegexFilter(Filter):
     def __init__(self, nameRegex: Pattern):
         """
         Inicializace filtru.
-        
+
         :param nameRegex: Regulární výraz určující množinu všech povolených jmen.
         :type nameRegex: Pattern
         """
@@ -92,7 +92,7 @@ class NameRegexFilter(Filter):
     def __call__(self, o) -> bool:
         """
         Volání filtru
-        
+
         :param o: jméno pro filtrování
         :type o: Name
         :return: True pokud má být jméno o propuštěno filtrem. False pokud má být odfiltrováno.
@@ -111,7 +111,7 @@ class NameAlfaFilter(Filter):
     def __init__(self, alfas: Set[str], caseInsensitive: bool = True):
         """
         Inicializace filtru.
-        
+
         :param alfas: Povolené alfa znaky.
         :type alfas: Set[str]
         :param caseInsensitive: Defaultné nezaleží na velikosti písmen. Pokud je false, tak na velikosit
@@ -127,7 +127,7 @@ class NameAlfaFilter(Filter):
     def __call__(self, o) -> bool:
         """
         Volání filtru
-        
+
         :param o: jméno pro filtrování
         :type o: Name
         :return: True pokud má být jméno o propuštěno filtrem. False pokud má být odfiltrováno.
@@ -147,7 +147,7 @@ class NameScriptFilter(Filter):
     def __init__(self, script: str):
         """
         Inicializace filtru.
-        
+
         :param script: Povolené písmo.
             Kontroluje výskyt poskytnutého řetězce ve výsledku unicodedata.name pro alpha znaky.
         :type script: str
@@ -159,7 +159,7 @@ class NameScriptFilter(Filter):
     def __call__(self, o) -> bool:
         """
         Volání filtru
-        
+
         :param o: jméno pro filtrování
         :type o: Name
         :return: True pokud má být jméno o propuštěno filtrem. False pokud má být odfiltrováno.
@@ -171,7 +171,7 @@ class NameScriptFilter(Filter):
     def _inScript(self, c):
         """
         Checks if given character is in script.
-        
+
         :param c: Char
         :type c: str
         """
@@ -188,10 +188,12 @@ class NamesFilter(Filter):
     Filtruje jména na základě vybraných jazyků a podoby samotného jména.
     """
 
-    def __init__(self, languages: Set[str], nameRegex: Pattern, alfas: Set[str], script: str):
+    def __init__(
+        self, languages: Set[str], nameRegex: Pattern, alfas: Set[str], script: str
+    ):
         """
         Inicializace filtru.
-        
+
         :param languages: Povolené jazyky.
         :type languages: Set[str]
         :param nameRegex: Regulární výraz určující množinu všech povolených jmen.
@@ -203,19 +205,28 @@ class NamesFilter(Filter):
         :type script: str
         """
 
-        self._languages = alwaysTrue if languages is None else NameLanguagesFilter(languages)
-        self._nameRegex = alwaysTrue if nameRegex is None else NameRegexFilter(nameRegex)
+        self._languages = (
+            alwaysTrue if languages is None else NameLanguagesFilter(languages)
+        )
+        self._nameRegex = (
+            alwaysTrue if nameRegex is None else NameRegexFilter(nameRegex)
+        )
         self._alfaFilter = alwaysTrue if alfas is None else NameAlfaFilter(alfas)
         self._scriptFilter = alwaysTrue if script is None else NameScriptFilter(script)
 
     def __call__(self, o) -> bool:
         """
         Volání filtru
-        
+
         :param o: jméno pro filtrování
         :type o: Name
         :return: True pokud má být jméno o propuštěno filtrem. False pokud má být odfiltrováno.
         :rtype: bool
         """
 
-        return self._languages(o) and self._nameRegex(o) and self._alfaFilter(o) and self._scriptFilter(o)
+        return (
+            self._languages(o)
+            and self._nameRegex(o)
+            and self._alfaFilter(o)
+            and self._scriptFilter(o)
+        )

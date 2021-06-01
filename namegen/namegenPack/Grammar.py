@@ -17,8 +17,16 @@ import regex as re
 
 from namegenPack import Errors
 from namegenPack.Word import Word, WordTypeMark
-from namegenPack.morpho.MorphCategories import MorphCategory, Gender, Number, \
-    MorphCategories, POS, Case, Note, Flag
+from namegenPack.morpho.MorphCategories import (
+    MorphCategory,
+    Gender,
+    Number,
+    MorphCategories,
+    POS,
+    Case,
+    Note,
+    Flag,
+)
 
 
 class Nonterminal(object):
@@ -27,12 +35,13 @@ class Nonterminal(object):
     Používá se k vygenerování běžného neterminálu (stringu), který je použit
     pro analýzu pomocí gramatiky.
     """
+
     NONTERMINAL_REGEX = re.compile(r"^([^\s()]+)\s*(\(([^()]+)\))?$", re.IGNORECASE)
 
     def __init__(self, n):
         """
         Vytvoření neterminálu z řetězcové reprezentace.
-        
+
         :param n: Neterminál reprezentovaný řetězcem.
         :type n: str
         """
@@ -43,15 +52,22 @@ class Nonterminal(object):
 
     def __str__(self):
         if len(self.params) > 0:
-            return "{}({})".format(self.name,
-                                   ",".join([p if v is None else p + "=" + v for p, v in sorted(self.params.items())]))
+            return "{}({})".format(
+                self.name,
+                ",".join(
+                    [
+                        p if v is None else p + "=" + v
+                        for p, v in sorted(self.params.items())
+                    ]
+                ),
+            )
         else:
             return self.name
 
     def __eq__(self, other):
         """
         Dva neterminály jsou si rovny, pokud mají stejný název.
-        
+
         :param other: Druhý neterminál pro porovnání.
         :type other: Nonterminal
         """
@@ -66,16 +82,19 @@ class Nonterminal(object):
     def addDefault(self, defVal):
         """
         Přiřzení defaultních hodnot chybějícím parametrům.
-        
+
         :param defVal: Defaultní hodnoty, které budeme přiřazovat.
         :type defVal: Dict[str,str]
         """
-        self.params = dict([(p, v) for p, v in defVal.items() if v is not None] + list(self.params.items()))
+        self.params = dict(
+            [(p, v) for p, v in defVal.items() if v is not None]
+            + list(self.params.items())
+        )
 
     def generateLeft(self, v):
         """
         Vygeneruje neterminál pro dané hodnoty ve formátu vhodném pro levou stranu pravidla.
-        
+
         :param v: Hodnoty, které budou přiřazeny parametrům neterminálu.
             Klíč je název parametru. Pokud dict obsahuje klíč, který neni
             v nonterminálu, tak se nic neděje, ale pokud neobsahuje klíč, který
@@ -83,7 +102,7 @@ class Nonterminal(object):
         :type v: Dict[str,str]
         :return: běžný neterminál
         :rtype: str
-        :raise InvalidGrammarException: 
+        :raise InvalidGrammarException:
             Pokud v neobsahuje všechny potřebné parametry
         """
 
@@ -98,13 +117,19 @@ class Nonterminal(object):
                     resV[par] = defV
                 else:
                     # nemáme defaultní hodnotu a ani předanou v argumentu metody
-                    raise InvalidGrammarException(Errors.ErrorMessenger.CODE_GRAMMAR_NONTERM_NO_PAR_VALUE,
-                                                  Errors.ErrorMessenger.getMessage(
-                                                      Errors.ErrorMessenger.CODE_GRAMMAR_NONTERM_NO_PAR_VALUE).format(
-                                                      str(self) + " <- " + par))
+                    raise InvalidGrammarException(
+                        Errors.ErrorMessenger.CODE_GRAMMAR_NONTERM_NO_PAR_VALUE,
+                        Errors.ErrorMessenger.getMessage(
+                            Errors.ErrorMessenger.CODE_GRAMMAR_NONTERM_NO_PAR_VALUE
+                        ).format(str(self) + " <- " + par),
+                    )
 
             params = ["{}={}".format(p, val) for p, val in sorted(resV.items())]
-            return self.name if len(resV) == 0 else "{}({})".format(self.name, ",".join(params))
+            return (
+                self.name
+                if len(resV) == 0
+                else "{}({})".format(self.name, ",".join(params))
+            )
         else:
             return self.name
 
@@ -116,10 +141,10 @@ class Nonterminal(object):
             NEXT(x,y)    ->    Název: NEXT, Parametry: x,y
             NEXT(x=1,y)    ->    Název: NEXT, Parametry: x,y, Hodnoty: x=1
             NEXT    ->    Název: NEXT
-        
+
         :param n: Daný neterminál.
         :type n: str
-        :raise InvalidGrammarException: 
+        :raise InvalidGrammarException:
             Pokud je předhozena nevalidní podoba neterminálu.
         """
 
@@ -129,9 +154,12 @@ class Nonterminal(object):
 
         if not matchNamePar:
             # zdá se, že neterminál je v nesprávném formátu
-            raise InvalidGrammarException(Errors.ErrorMessenger.CODE_GRAMMAR_NONTERM_INVALID_SYNTAX,
-                                          Errors.ErrorMessenger.getMessage(
-                                              Errors.ErrorMessenger.CODE_GRAMMAR_NONTERM_INVALID_SYNTAX).format(n))
+            raise InvalidGrammarException(
+                Errors.ErrorMessenger.CODE_GRAMMAR_NONTERM_INVALID_SYNTAX,
+                Errors.ErrorMessenger.getMessage(
+                    Errors.ErrorMessenger.CODE_GRAMMAR_NONTERM_INVALID_SYNTAX
+                ).format(n),
+            )
         # máme match
         # Příklad pro osvětlení čísel skupin:
         #    NEXT(x=1,y)
@@ -147,23 +175,29 @@ class Nonterminal(object):
             for pv in [x.split("=") for x in matchNamePar.group(3).split(",")]:
                 if len(pv) > 2:
                     # více než jedno rovnáse
-                    raise InvalidGrammarException(Errors.ErrorMessenger.CODE_GRAMMAR_NONTERM_INVALID_SYNTAX,
-                                                  Errors.ErrorMessenger.getMessage(
-                                                      Errors.ErrorMessenger.CODE_GRAMMAR_NONTERM_INVALID_SYNTAX).format(
-                                                      n))
+                    raise InvalidGrammarException(
+                        Errors.ErrorMessenger.CODE_GRAMMAR_NONTERM_INVALID_SYNTAX,
+                        Errors.ErrorMessenger.getMessage(
+                            Errors.ErrorMessenger.CODE_GRAMMAR_NONTERM_INVALID_SYNTAX
+                        ).format(n),
+                    )
 
                 if pv[0] in self.params:
                     # 2x stejný parametr
-                    raise InvalidGrammarException(Errors.ErrorMessenger.CODE_GRAMMAR_NONTERM_INVALID_SYNTAX,
-                                                  Errors.ErrorMessenger.getMessage(
-                                                      Errors.ErrorMessenger.CODE_GRAMMAR_NONTERM_INVALID_SYNTAX).format(
-                                                      n))
+                    raise InvalidGrammarException(
+                        Errors.ErrorMessenger.CODE_GRAMMAR_NONTERM_INVALID_SYNTAX,
+                        Errors.ErrorMessenger.getMessage(
+                            Errors.ErrorMessenger.CODE_GRAMMAR_NONTERM_INVALID_SYNTAX
+                        ).format(n),
+                    )
                 if pv[0][0] == "$":
                     # špatně pojmenovaný parametr
-                    raise InvalidGrammarException(Errors.ErrorMessenger.CODE_GRAMMAR_NONTERM_INVALID_SYNTAX,
-                                                  Errors.ErrorMessenger.getMessage(
-                                                      Errors.ErrorMessenger.CODE_GRAMMAR_NONTERM_INVALID_SYNTAX).format(
-                                                      n))
+                    raise InvalidGrammarException(
+                        Errors.ErrorMessenger.CODE_GRAMMAR_NONTERM_INVALID_SYNTAX,
+                        Errors.ErrorMessenger.getMessage(
+                            Errors.ErrorMessenger.CODE_GRAMMAR_NONTERM_INVALID_SYNTAX
+                        ).format(n),
+                    )
 
                 if len(pv) == 2:
                     self.params[pv[0]] = pv[1]
@@ -184,6 +218,7 @@ class Terminal(object):
         """
         Druh terminálu.
         """
+
         EOF = 0  # konec vstupu
 
         N = "1"  # podstatné jméno
@@ -210,7 +245,7 @@ class Terminal(object):
         def isPOSType(self):
             """
             Určuje zda-li se jedná o typ terminálu odpovídajícím slovnímu druhu + zkratka.
-            
+
             :return: True odpovídá slovnímu druhu. False jinak.
             :rtype: bool
             """
@@ -220,7 +255,7 @@ class Terminal(object):
             """
             Provede konverzi do POS.
             Pokud nelze vrací None
-            
+
             :return: Mluvnická kategorie.
             :rtype: POS
             """
@@ -231,8 +266,21 @@ class Terminal(object):
                 # a to pouze typy terminálu, které vyjadřují slovní druhy
                 return None
 
-    Type.POSTypes = {Type.N, Type.A, Type.P, Type.C, Type.V, Type.D, Type.R, Type.RA, Type.RM, Type.J, Type.T, Type.I,
-                     Type.ABBREVIATION}
+    Type.POSTypes = {
+        Type.N,
+        Type.A,
+        Type.P,
+        Type.C,
+        Type.V,
+        Type.D,
+        Type.R,
+        Type.RA,
+        Type.RM,
+        Type.J,
+        Type.T,
+        Type.I,
+        Type.ABBREVIATION,
+    }
     """Typy, které jsou POS"""
 
     Type.toPOSMap = {
@@ -248,7 +296,7 @@ class Terminal(object):
         Type.J: POS.CONJUNCTION,  # spojka
         Type.T: POS.PARTICLE,  # částice
         Type.I: POS.INTERJECTION,  # citoslovce
-        Type.ABBREVIATION: POS.ABBREVIATION  # zkratka
+        Type.ABBREVIATION: POS.ABBREVIATION,  # zkratka
     }
     """Zobrazení typu do POS."""
 
@@ -256,6 +304,7 @@ class Terminal(object):
         """
         Terminálový atributy.
         """
+
         VOLUNTARY_ATTRIBUTE_SIGN = "?"  # znak volitelného atributu
 
         class Type(Enum):
@@ -269,8 +318,12 @@ class Terminal(object):
             CASE = "c"  # pád slova musí být takový    (filtrovací atribut)
             NOTE = "note"  # poznámka slova musí být taková    (filtrovací atribut)
             FLAGS = "f"  # Flagy, které musí mít skupina z morfologické analýzy.    (Speciální atribut)
-            WORD_TYPE = "t"  # druh slova ve jméně Křestní, příjmení atd. (Informační atribut)
-            MATCH_REGEX = "r"  # Slovo samotné sedí na daný regulární výraz. (Speciální atribut)
+            WORD_TYPE = (
+                "t"  # druh slova ve jméně Křestní, příjmení atd. (Informační atribut)
+            )
+            MATCH_REGEX = (
+                "r"  # Slovo samotné sedí na daný regulární výraz. (Speciální atribut)
+            )
             PRIORITY = "p"  # Přenastavuje prioritu terminálu (výchozí 0). Ve fázi generování tvarů je možné
 
             # filtrovat na základě priority. (Speciální atribut)
@@ -281,7 +334,7 @@ class Terminal(object):
             def isFiltering(self):
                 """
                 Určuje zda-li daný typ je filtrovacím (klade dodatečné restrikce).
-                
+
                 :return: True filtrovací. False jinak.
                 :rtype: bool
                 """
@@ -294,7 +347,7 @@ class Terminal(object):
         def __init__(self, attrType, val, voluntary=False):
             """
             Vytvoří atribut terminálu.
-            
+
             :param attrType: Druh attributu.
             :type attrType: self.Type
             :param val: Hodnota atributu.
@@ -311,10 +364,14 @@ class Terminal(object):
                     # je možných více hodnot
                     for f in val:
                         if not isinstance(f, MorphCategory):
-                            raise InvalidGrammarException(Errors.ErrorMessenger.CODE_GRAMMAR_INVALID_FILE)
+                            raise InvalidGrammarException(
+                                Errors.ErrorMessenger.CODE_GRAMMAR_INVALID_FILE
+                            )
                 else:
                     if not isinstance(val, MorphCategory):
-                        raise InvalidGrammarException(Errors.ErrorMessenger.CODE_GRAMMAR_INVALID_FILE)
+                        raise InvalidGrammarException(
+                            Errors.ErrorMessenger.CODE_GRAMMAR_INVALID_FILE
+                        )
             self._val = val
 
         @property
@@ -331,7 +388,7 @@ class Terminal(object):
         def voluntary(self, v):
             """
             Nastaví voluntary flag. Popis voluntary je v getteru.
-            
+
             :param v: Má být voluntary nebo ne?
                 True znamená voluntary.
             :type v: bool
@@ -343,7 +400,7 @@ class Terminal(object):
         def createFrom(cls, s):
             """
             Vytvoří atribut z řetězce.
-            
+
             :param s: Řetezec reprezentující atribut a jeho hodnotu
                 Příklad: "g=M"
             :type s: str
@@ -365,9 +422,12 @@ class Terminal(object):
             except ValueError:
                 # neplatný argumentu
 
-                raise InvalidGrammarException(Errors.ErrorMessenger.CODE_GRAMMAR_INVALID_ARGUMENT,
-                                              Errors.ErrorMessenger.getMessage(
-                                                  Errors.ErrorMessenger.CODE_GRAMMAR_INVALID_ARGUMENT).format(s))
+                raise InvalidGrammarException(
+                    Errors.ErrorMessenger.CODE_GRAMMAR_INVALID_ARGUMENT,
+                    Errors.ErrorMessenger.getMessage(
+                        Errors.ErrorMessenger.CODE_GRAMMAR_INVALID_ARGUMENT
+                    ).format(s),
+                )
 
             # vytvoříme hodnotu atributu
             if cls.Type.GENDER == t:
@@ -386,9 +446,12 @@ class Terminal(object):
                 try:
                     v = re.compile(aV[1:-1])  # [1:-1] odstraňujeme " ze začátku a konce
                 except re.error:
-                    raise InvalidGrammarException(Errors.ErrorMessenger.CODE_GRAMMAR_INVALID_ARGUMENT,
-                                                  Errors.ErrorMessenger.getMessage(
-                                                      Errors.ErrorMessenger.CODE_GRAMMAR_INVALID_ARGUMENT).format(s))
+                    raise InvalidGrammarException(
+                        Errors.ErrorMessenger.CODE_GRAMMAR_INVALID_ARGUMENT,
+                        Errors.ErrorMessenger.getMessage(
+                            Errors.ErrorMessenger.CODE_GRAMMAR_INVALID_ARGUMENT
+                        ).format(s),
+                    )
             elif cls.Type.PRIORITY == t:
                 try:
                     v = int(aV)
@@ -396,9 +459,12 @@ class Terminal(object):
                         # negativní hodnoty nejsou povoleny
                         raise ValueError()
                 except ValueError:
-                    raise InvalidGrammarException(Errors.ErrorMessenger.CODE_GRAMMAR_INVALID_ARGUMENT,
-                                                  Errors.ErrorMessenger.getMessage(
-                                                      Errors.ErrorMessenger.CODE_GRAMMAR_INVALID_ARGUMENT).format(s))
+                    raise InvalidGrammarException(
+                        Errors.ErrorMessenger.CODE_GRAMMAR_INVALID_ARGUMENT,
+                        Errors.ErrorMessenger.getMessage(
+                            Errors.ErrorMessenger.CODE_GRAMMAR_INVALID_ARGUMENT
+                        ).format(s),
+                    )
             else:
                 v = WordTypeMark(aV)
 
@@ -420,12 +486,20 @@ class Terminal(object):
             """
             :return: Reprezentace hodnoty attributu.
             """
-            return self._val if self.type != self.Type.MATCH_REGEX else "\"" + self._val.pattern + "\""
+            return (
+                self._val
+                if self.type != self.Type.MATCH_REGEX
+                else '"' + self._val.pattern + '"'
+            )
 
         def __str__(self):
 
-            return str(self._type.value) + (self.VOLUNTARY_ATTRIBUTE_SIGN if self.voluntary else "") + "=" + str(
-                self.valueRepresentation)
+            return (
+                str(self._type.value)
+                + (self.VOLUNTARY_ATTRIBUTE_SIGN if self.voluntary else "")
+                + "="
+                + str(self.valueRepresentation)
+            )
 
         def __hash__(self):
 
@@ -433,7 +507,10 @@ class Terminal(object):
 
         def __eq__(self, other):
             if self.__class__ is other.__class__:
-                return self._type == other.type and self.valueRepresentation == other.valueRepresentation
+                return (
+                    self._type == other.type
+                    and self.valueRepresentation == other.valueRepresentation
+                )
 
             return False
 
@@ -442,7 +519,7 @@ class Terminal(object):
         Vytvoření terminálu.
         Pokud není předán atribut s typem slova ve jméně, tak je automaticky přidán
         attribut s hodnotou WordTypeMark.UNKNOWN
-        
+
         :param terminalType: Druh terminálu.
         :type terminalType: Type
         :param attr: Attributy terminálu. Určují dodatečné podmínky/informace na vstupní slovo.
@@ -462,7 +539,9 @@ class Terminal(object):
         # zjistíme, zda-li byl předán word type mark
         if not any(a.type == self.Attribute.Type.WORD_TYPE for a in attr):
             # nebyl, přidáme neznámý
-            attr = attr | {self.Attribute(self.Attribute.Type.WORD_TYPE, WordTypeMark.UNKNOWN)}
+            attr = attr | {
+                self.Attribute(self.Attribute.Type.WORD_TYPE, WordTypeMark.UNKNOWN)
+            }
 
         # zjistíme jestli byla přepsána defaultní priorita
         if not any(a.type == self.Attribute.Type.PRIORITY for a in attr):
@@ -472,17 +551,28 @@ class Terminal(object):
         self._attributes = frozenset(attr)
 
         # pojďme zjistit hodnoty filtrovacích atributů
-        self._fillteringAttrVal = set(a.value for a in self._attributes if a.type.isFiltering)
+        self._fillteringAttrVal = set(
+            a.value for a in self._attributes if a.type.isFiltering
+        )
         self._fillteringAttrValWithoutVoluntary = set(
-            a.value for a in self._attributes if a.type.isFiltering and not a.voluntary)
+            a.value for a in self._attributes if a.type.isFiltering and not a.voluntary
+        )
 
-        if len(self._fillteringAttrVal) - len(self._fillteringAttrValWithoutVoluntary) > 1:
+        if (
+            len(self._fillteringAttrVal) - len(self._fillteringAttrValWithoutVoluntary)
+            > 1
+        ):
             # dovolujeme pouze 1 volitelny atribut
-            raise InvalidGrammarException(Errors.ErrorMessenger.CODE_GRAMMAR_MULTIPLE_VAL_ATTRIBUTES,
-                                          Errors.ErrorMessenger.getMessage(
-                                              Errors.ErrorMessenger.CODE_GRAMMAR_MULTIPLE_VAL_ATTRIBUTES))
+            raise InvalidGrammarException(
+                Errors.ErrorMessenger.CODE_GRAMMAR_MULTIPLE_VAL_ATTRIBUTES,
+                Errors.ErrorMessenger.getMessage(
+                    Errors.ErrorMessenger.CODE_GRAMMAR_MULTIPLE_VAL_ATTRIBUTES
+                ),
+            )
 
-        self._hasVoluntaryAttribut = len(self._fillteringAttrVal) != len(self._fillteringAttrValWithoutVoluntary)
+        self._hasVoluntaryAttribut = len(self._fillteringAttrVal) != len(
+            self._fillteringAttrValWithoutVoluntary
+        )
 
         # cache pro zrychlení tokenMatch
         self._matchCache = {}
@@ -490,7 +580,7 @@ class Terminal(object):
     def getAttribute(self, t):
         """
         Vrací atribut daného druhu.
-        
+
         :param t: druh attributu
         :type t: self.Attribute.Type
         :return: Atribut daného druhu a None, pokud takový atribut nemá.
@@ -507,7 +597,7 @@ class Terminal(object):
     def type(self):
         """
         Druh terminálu.
-        
+
         :rtype: self.Type
         """
         return self._type
@@ -518,7 +608,7 @@ class Terminal(object):
         Získání všech hodnot attributů, které kladou dodatečné podmínky (např. rod musí být mužský).
         Všechny takové attributy mají value typu MorphCategory.
         Nevybírá informační atributy.
-        
+
         :return: Hodnoty filtrovacích atributů, které má tento terminál.
         :rtype: Set[MorphCategory]
         """
@@ -538,7 +628,7 @@ class Terminal(object):
         Získání všech hodnot nevolitelných attributů, které kladou dodatečné podmínky (např. rod musí být mužský).
         Všechny takové attributy mají value typu MorphCategory.
         Nevybírá informační atributy.
-        
+
         :return: Hodnoty filtrovacích atributů, které má tento terminál a nejsou volitelné.
         :rtype: Set[MorphCategory]
         """
@@ -548,7 +638,7 @@ class Terminal(object):
     def tokenMatch(self, t):
         """
         Určuje zda daný token odpovídá tomuto terminálu.
-        
+
         :param t: Token pro kontrolu.
         :type t: Token
         :return: Vrací True, pokud odpovídá. Jinak false.
@@ -566,7 +656,7 @@ class Terminal(object):
     def tokenMatchWithoutCache(self, t):
         """
         Stejně jako tokenMatch určuje zda daný token odpovídá tomuto terminálu, ale bez použití cache
-        
+
         :param t: Token pro kontrolu.
         :type t: Token
         :return: Vrací True, pokud odpovídá. Jinak false.
@@ -578,7 +668,10 @@ class Terminal(object):
             # kontrola na regex match neprošla
             return False
 
-        if t.type == Token.Type.ANALYZE_UNKNOWN and self.type in self.UNKNOWN_ANALYZE_TERMINAL_MATCH:
+        if (
+            t.type == Token.Type.ANALYZE_UNKNOWN
+            and self.type in self.UNKNOWN_ANALYZE_TERMINAL_MATCH
+        ):
             # tento druh tokenu sedí na každý termínal druhu z self.UNKNOWN_ANALYZE_TERMINAL_MATCH
             return True
 
@@ -592,15 +685,22 @@ class Terminal(object):
                     groupFlags = self.getAttribute(self.Attribute.Type.FLAGS)
                     groupFlags = set() if groupFlags is None else groupFlags.value
                     # jedná se o typ terminálu používající analyzátor
-                    pos = t.word.info.getAllForCategory(MorphCategories.POS, self.fillteringAttrValues,
-                                                        set(), groupFlags)
+                    pos = t.word.info.getAllForCategory(
+                        MorphCategories.POS,
+                        self.fillteringAttrValues,
+                        set(),
+                        groupFlags,
+                    )
 
                     # máme všechny možné slovní druhy, které prošly atributovým filtrem
                     if len(pos) == 0 and self.hasVoluntaryAttr:
                         # zkusme štěstí ještě pro variantu bez volitelných
-                        pos = t.word.info.getAllForCategory(MorphCategories.POS,
-                                                            self.fillteringAttrValuesWithoutVoluntary,
-                                                            set(), groupFlags)
+                        pos = t.word.info.getAllForCategory(
+                            MorphCategories.POS,
+                            self.fillteringAttrValuesWithoutVoluntary,
+                            set(),
+                            groupFlags,
+                        )
 
                     return self._type.toPOS() in pos
                 except Word.WordCouldntGetInfoException:
@@ -618,16 +718,25 @@ class Terminal(object):
                     # jedná se o speciální druh tokenu, který zahrnuje dva druhy tokenu a to římskou číslici a
                     # a iniciálovou zkratku. Lex. anal. o tom nebyl schopen rozhodnout přesně.
 
-                    return self._type.value in {Token.Type.ROMAN_NUMBER.value, Token.Type.INITIAL_ABBREVIATION.value}
+                    return self._type.value in {
+                        Token.Type.ROMAN_NUMBER.value,
+                        Token.Type.INITIAL_ABBREVIATION.value,
+                    }
 
                 return t.type.value == self._type.value
         else:
             # Jedná se o jednoduchý token bez nutnosti morfologické analýzy.
-            return t.type.value == self._type.value  # V tomto případě požívá terminál a token stejné hodnoty u typů
+            return (
+                t.type.value == self._type.value
+            )  # V tomto případě požívá terminál a token stejné hodnoty u typů
 
     def __str__(self):
 
-        s = str(self._type.value) if self.morph else Grammar.NON_GEN_MORPH_SIGN + str(self._type.value)
+        s = (
+            str(self._type.value)
+            if self.morph
+            else Grammar.NON_GEN_MORPH_SIGN + str(self._type.value)
+        )
         if self._attributes:
             s += "{" + ", ".join(str(a) for a in self._attributes) + "}"
 
@@ -652,14 +761,23 @@ class Token(object):
         """
         Druh tokenu
         """
+
         ANALYZE = 1  # komplexní typ určený pouze morfologickou analýzou slova
-        ANALYZE_UNKNOWN = 2  # Přestože by měl mít token analýzu, tak se ji nepodařilo získat.
+        ANALYZE_UNKNOWN = (
+            2  # Přestože by měl mít token analýzu, tak se ji nepodařilo získat.
+        )
         ROMAN_NUMBER_INITIAL_ABBREVIATION = 3  # Římská číslovka či iniciálová zkratka.
-        NUMBER = Terminal.Type.NUMBER.value  # číslice (pouze z číslovek) Příklady: 12., 12
-        ROMAN_NUMBER = Terminal.Type.ROMAN_NUMBER.value  # římská číslice Je třeba zohlednit i analýzu kvůli shodě s
+        NUMBER = (
+            Terminal.Type.NUMBER.value
+        )  # číslice (pouze z číslovek) Příklady: 12., 12
+        ROMAN_NUMBER = (
+            Terminal.Type.ROMAN_NUMBER.value
+        )  # římská číslice Je třeba zohlednit i analýzu kvůli shodě s
         # předložkou V
         DEGREE_TITLE = Terminal.Type.DEGREE_TITLE.value  # titul
-        INITIAL_ABBREVIATION = Terminal.Type.INITIAL_ABBREVIATION.value  # Iniciálová zkratka. Je třeba zohlednit i
+        INITIAL_ABBREVIATION = (
+            Terminal.Type.INITIAL_ABBREVIATION.value
+        )  # Iniciálová zkratka. Je třeba zohlednit i
         # analýzu kvůli shodě s některými předložkami.
         EOF = Terminal.Type.EOF.value  # konec vstupu
         X = Terminal.Type.X.value  # neznámé
@@ -681,7 +799,7 @@ class Token(object):
     def __init__(self, word: Optional[Word], tokenType):
         """
         Vytvoření tokenu.
-        
+
         :param word: Slovo ze, kterého token vznikl.
         :type word: Optional[namegenPack.Name.Word]
         :param tokenType: Druh tokenu.
@@ -694,8 +812,8 @@ class Token(object):
     def type(self):
         """
         Druh tokenu.
-        
-        :rtype: Type 
+
+        :rtype: Type
         """
         return self._type
 
@@ -727,6 +845,7 @@ class Lex(object):
     """
     Lexikální analyzátor pro jména.
     """
+
     __TITLES = set()
     """Banka titulů je načtena na začátku z konfiguračního souboru. Pro přiřazení použijte
     metodu setTitles"""
@@ -735,11 +854,17 @@ class Lex(object):
     """Banka prefixů titulů. Příklady titulových prefixů pro titul  Ing.arch.:
         Ing."""
 
-    ROMAN_NUMBER_REGEX = re.compile(r"^((X{1,3}(IX|IV|V?I{0,3}))|((IX|IV|I{1,3}|VI{0,3})))\.?$", re.IGNORECASE)
+    ROMAN_NUMBER_REGEX = re.compile(
+        r"^((X{1,3}(IX|IV|V?I{0,3}))|((IX|IV|I{1,3}|VI{0,3})))\.?$", re.IGNORECASE
+    )
     NUMBER_REGEX = re.compile(r"^[0-9]+\.?$", re.IGNORECASE)
 
-    TOKEN_TYPES_THAT_CAN_USE_MA = {Token.Type.ANALYZE, Token.Type.ROMAN_NUMBER, Token.Type.INITIAL_ABBREVIATION,
-                                   Token.Type.ROMAN_NUMBER_INITIAL_ABBREVIATION}
+    TOKEN_TYPES_THAT_CAN_USE_MA = {
+        Token.Type.ANALYZE,
+        Token.Type.ROMAN_NUMBER,
+        Token.Type.INITIAL_ABBREVIATION,
+        Token.Type.ROMAN_NUMBER_INITIAL_ABBREVIATION,
+    }
 
     @classmethod
     def setTitles(cls, titles: Set[str]):
@@ -748,7 +873,7 @@ class Lex(object):
         Zabezpečuje, aby byly brány i různé varianty u titulů typu:
             Ing.arch.
             Varianty: Ing.arch.    Ing. arch.
-        
+
         :param titles: Množina titulů.
         :type titles: Set[str]
         """
@@ -800,8 +925,11 @@ class Lex(object):
             wCnt += 1
 
             romanNumberFlag = cls.ROMAN_NUMBER_REGEX.match(str(w))
-            initialAbberFlag = str(w).isupper() and not str.isdigit(w[0]) and (
-                        len(w) == 1 or (len(w) == 2 and w[-1] == "."))
+            initialAbberFlag = (
+                str(w).isupper()
+                and not str.isdigit(w[0])
+                and (len(w) == 1 or (len(w) == 2 and w[-1] == "."))
+            )
 
             if romanNumberFlag and initialAbberFlag:
                 # může se jednat o římskou čislovku a zároven o iniciálovou zkratku
@@ -829,14 +957,15 @@ class Lex(object):
                     # analýzu máme
 
                     # Je tato analýza slova zásvilá na jméně, ve kterém se vyskytuje?
-                    newWord = Word.createNameDependantWord(str(token.word), name, wCnt-1)
+                    newWord = Word.createNameDependantWord(
+                        str(token.word), name, wCnt - 1
+                    )
                     if newWord is not None:
                         # createNameDependantWord vrací None pokud nemá daná kombinace jména a slovo na jméně
                         # závislou analýzu. Nyní je jasná, že jí má. Přiřadíme tedy na jméně závislé slovo tokenu.
                         # Toto slovo je pak svázáno se svým jménem a lze je pak dále bezpečně používát v cache u
                         # gramatik (má hash a eq svázané se jménem).
                         token.word = newWord
-
 
                 except Word.WordCouldntGetInfoException:
                     # bohužel analýza není, musíme změnit druh tokenu
@@ -852,7 +981,7 @@ class Lex(object):
     def isTitle(cls, name, pos):
         """
         Zjistí zdali se na aktuální pozici vyskytuje titul.
-        
+
         :param name: Jméno, ve kterém hledáme.
         :type name: Name
         :param pos: Pozice slova, kde začínáme hledat titul.
@@ -865,7 +994,9 @@ class Lex(object):
 
         pos += 1
 
-        if str(w) in cls.__TITLES or (str(w) in cls.__TITLES_PREFIXES and pos < len(name)):
+        if str(w) in cls.__TITLES or (
+            str(w) in cls.__TITLES_PREFIXES and pos < len(name)
+        ):
             # jedná se o titul nebo o jeho potencionální část
             if str(w) in cls.__TITLES_PREFIXES and pos < len(name):
                 # může se jednat o část delšího titulu
@@ -880,7 +1011,9 @@ class Lex(object):
 
                 lookAhead += 1
 
-                while str(actTitlePrefix) in cls.__TITLES_PREFIXES and lookAhead < len(name):
+                while str(actTitlePrefix) in cls.__TITLES_PREFIXES and lookAhead < len(
+                    name
+                ):
                     if actTitlePrefix in cls.__TITLES:
                         lastEvaluatedAsTitle = lookAhead
                     actTitlePrefix += str(name[lookAhead])
@@ -910,7 +1043,9 @@ class AnalyzedToken(object):
     dané slovo ohýbat, či nikoliv.
     """
 
-    def __init__(self, token: Token, morph: bool = None, matchingTerminal: Terminal = None):
+    def __init__(
+        self, token: Token, morph: bool = None, matchingTerminal: Terminal = None
+    ):
         """
         Pro běžný token vyrobí jaho analyzovanou variantu.
 
@@ -930,8 +1065,11 @@ class AnalyzedToken(object):
 
     def __eq__(self, other):
         if isinstance(other, self.__class__):
-            return self._token == other._token and self._morph == other._morph \
-                   and self._matchingTerminal == other._matchingTerminal
+            return (
+                self._token == other._token
+                and self._morph == other._morph
+                and self._matchingTerminal == other._matchingTerminal
+            )
 
         return False
 
@@ -947,7 +1085,7 @@ class AnalyzedToken(object):
     def morph(self):
         """
         Příznak zda se slovo, jenž je reprezentováno tímto tokenem, má ohýbat.
-        
+
         :return: None neznáme. True ohýbat. False neohýbat.
         :rtype: bool
         """
@@ -957,7 +1095,7 @@ class AnalyzedToken(object):
     def morph(self, val: bool):
         """
         Určení zda-li se má slovo, jenž je reprezentováno tímto tokenem, ohýbat.
-        
+
         :param val: True ohýbat. False neohýbat.
         :type val: bool
         """
@@ -967,7 +1105,7 @@ class AnalyzedToken(object):
     def matchingTerminal(self) -> Terminal:
         """
         Získaný terminál při analýze, který odpovídal tokenu.
-        
+
         :return: Odpovídající terminál z gramatiky.
         :rtype: Terminal
         """
@@ -978,7 +1116,7 @@ class AnalyzedToken(object):
     def matchingTerminal(self, t: Terminal):
         """
         Přiřazení terminálu.
-        
+
         :param t: Odpovídající terminál.
         :type t: Terminal
         """
@@ -996,20 +1134,24 @@ class AnalyzedToken(object):
         Příklad: Analýzou jsme zjistili, že se může jednat pouze o podstatné jméno rodu mužského v jednotném čísle.
 
         Tyto dodatečné podmínky jsou přímo uzpůsobeny pro použití výsledku ke generování tvarů.
-        
+
         :rtype: Set[MorphCategory]
         """
 
         # nejprve vložíme filtrovací atributy
         categories = self.matchingTerminal.fillteringAttrValues.copy()
-        groupFlags = self.matchingTerminal.getAttribute(self.matchingTerminal.Attribute.Type.FLAGS)
+        groupFlags = self.matchingTerminal.getAttribute(
+            self.matchingTerminal.Attribute.Type.FLAGS
+        )
         groupFlags = set() if groupFlags is None else groupFlags.value
 
         # můžeme získat další kategorie na základě morfologické analýzy
         if self.matchingTerminal.type.isPOSType:
             # pro práci s morfologickou analýzou musí byt POS type
 
-            categories.add(self.matchingTerminal.type.toPOS())  # vložíme požadovaný slovní druh do filtru
+            categories.add(
+                self.matchingTerminal.type.toPOS()
+            )  # vložíme požadovaný slovní druh do filtru
 
             # nejprve zkusím s volitelnými atributy
 
@@ -1018,15 +1160,19 @@ class AnalyzedToken(object):
             try:
                 morphsInfo = self._token.word.info.getAll(categories, set(), groupFlags)
             except Word.WordCouldntGetInfoException:
-                #asi nemáme analýzu vůbec
+                # asi nemáme analýzu vůbec
                 pass
             else:
                 if len(morphsInfo) == 0:
                     # zkusme štěstí ještě pro variantu bez volitelných atributů
-                    categories = self.matchingTerminal.fillteringAttrValuesWithoutVoluntary.copy()
+                    categories = (
+                        self.matchingTerminal.fillteringAttrValuesWithoutVoluntary.copy()
+                    )
                     categories.add(self.matchingTerminal.type.toPOS())
 
-                    morphsInfo = self._token.word.info.getAll(categories, set(), groupFlags)
+                    morphsInfo = self._token.word.info.getAll(
+                        categories, set(), groupFlags
+                    )
 
             # Například pokud víme, že máme přídavné jméno rodu středního v jednotném čísle
             # a morf. analýza nám řekne, že přídavné jméno může být pouze prvního stupně, tak tuto informaci zařadíme
@@ -1041,7 +1187,9 @@ class AnalyzedToken(object):
                     # zcela vynechaný.
                     continue
                 # noinspection PyTypeChecker
-                if len(next(iter(morphCategoryValues)).__class__) > len(morphCategoryValues):
+                if len(next(iter(morphCategoryValues)).__class__) > len(
+                    morphCategoryValues
+                ):
                     # danou kategorii má cenu filtrovat jelikož analýza určila, že slovo nemá všechny
                     # hodnoty z této kategorie.
                     categories |= morphCategoryValues
@@ -1058,13 +1206,22 @@ class Rule(object):
     Reprezentace pravidla pro gramatiku.
     """
 
-    TERMINAL_REGEX = re.compile(r"^(.+?)(\{(.*)\})?$")  # oddělení typu a attrbutů z terminálu
+    TERMINAL_REGEX = re.compile(
+        r"^(.+?)(\{(.*)\})?$"
+    )  # oddělení typu a attrbutů z terminálu
 
-    def __init__(self, fromString, terminals=None, nonterminals=None, leftSide: str = None, rightSide=None):
+    def __init__(
+        self,
+        fromString,
+        terminals=None,
+        nonterminals=None,
+        leftSide: str = None,
+        rightSide=None,
+    ):
         """
         Vytvoření pravidla z řetězce.
         formát pravidla: Neterminál -> Terminály a neterminály
-        
+
         :param fromString: Pravidlo v podobě řetězce.
         :type fromString: Optional[str]
         :param terminals: Zde bude ukládat nalezené terminály.
@@ -1078,7 +1235,7 @@ class Rule(object):
             Jedná se o jeden terminály či prázdný řetězec Grammar.EMPTY_STR.
             Neprovádí kontroly jako v případě kdy je hodnota brána z fromString.
         :type rightSide: List[Terminal|Grammar.EMPTY_STR]
-        :raise InvalidGrammarException: 
+        :raise InvalidGrammarException:
              pokud je pravidlo v chybném formátu.
         """
 
@@ -1087,17 +1244,29 @@ class Rule(object):
                 self._leftSide, self._rightSide = fromString.split("->", 1)
             except ValueError:
                 # špatný formát pravidla
-                raise InvalidGrammarException(Errors.ErrorMessenger.CODE_GRAMMAR_INVALID_FILE,
-                                              Errors.ErrorMessenger.getMessage(
-                                                  Errors.ErrorMessenger.CODE_GRAMMAR_INVALID_FILE) + "\n\t" + fromString)
+                raise InvalidGrammarException(
+                    Errors.ErrorMessenger.CODE_GRAMMAR_INVALID_FILE,
+                    Errors.ErrorMessenger.getMessage(
+                        Errors.ErrorMessenger.CODE_GRAMMAR_INVALID_FILE
+                    )
+                    + "\n\t"
+                    + fromString,
+                )
 
-        self._leftSide = self._parseSymbol(self._leftSide) if leftSide is None else leftSide
+        self._leftSide = (
+            self._parseSymbol(self._leftSide) if leftSide is None else leftSide
+        )
         if isinstance(self._leftSide, Terminal) or self._leftSide == Grammar.EMPTY_STR:
             # terminál nebo prázdný řetězec
             # ovšem v naší gramatice může být na levé straně pouze neterminál
-            raise InvalidGrammarException(Errors.ErrorMessenger.CODE_GRAMMAR_INVALID_FILE,
-                                          Errors.ErrorMessenger.getMessage(
-                                              Errors.ErrorMessenger.CODE_GRAMMAR_INVALID_FILE) + "\n\t" + fromString)
+            raise InvalidGrammarException(
+                Errors.ErrorMessenger.CODE_GRAMMAR_INVALID_FILE,
+                Errors.ErrorMessenger.getMessage(
+                    Errors.ErrorMessenger.CODE_GRAMMAR_INVALID_FILE
+                )
+                + "\n\t"
+                + fromString,
+            )
 
         # neterminál, vše je ok
         if nonterminals is not None:
@@ -1123,16 +1292,29 @@ class Rule(object):
                                     nonterminals.add(self.rightSide[i])
                 except InvalidGrammarException as e:
                     # došlo k potížím s aktuálním pravidlem
-                    raise InvalidGrammarException(Errors.ErrorMessenger.CODE_GRAMMAR_INVALID_FILE,
-                                                  Errors.ErrorMessenger.getMessage(
-                                                      Errors.ErrorMessenger.CODE_GRAMMAR_INVALID_FILE)
-                                                  + "\n\t" + x + "\t" + fromString
-                                                  + "\n\t" + e.message)
+                    raise InvalidGrammarException(
+                        Errors.ErrorMessenger.CODE_GRAMMAR_INVALID_FILE,
+                        Errors.ErrorMessenger.getMessage(
+                            Errors.ErrorMessenger.CODE_GRAMMAR_INVALID_FILE
+                        )
+                        + "\n\t"
+                        + x
+                        + "\t"
+                        + fromString
+                        + "\n\t"
+                        + e.message,
+                    )
                 except:
-                    raise InvalidGrammarException(Errors.ErrorMessenger.CODE_GRAMMAR_INVALID_FILE,
-                                                  Errors.ErrorMessenger.getMessage(
-                                                      Errors.ErrorMessenger.CODE_GRAMMAR_INVALID_FILE)
-                                                  + "\n\t" + x + "\t" + fromString)
+                    raise InvalidGrammarException(
+                        Errors.ErrorMessenger.CODE_GRAMMAR_INVALID_FILE,
+                        Errors.ErrorMessenger.getMessage(
+                            Errors.ErrorMessenger.CODE_GRAMMAR_INVALID_FILE
+                        )
+                        + "\n\t"
+                        + x
+                        + "\t"
+                        + fromString,
+                    )
         else:
             self._rightSide = rightSide
             if terminals is not None or nonterminals is not None:
@@ -1152,11 +1334,11 @@ class Rule(object):
     def _parseSymbol(cls, s):
         """
         Získá z řetězce symbol z gramatiky.
-        
+
         :param s: Řetězec, který by měl obsahovat neterminál, terminál či symbol prázdného řetězce.
         :type s: str
         :return: Symbol v gramatice
-        :raise InvalidGrammarException: 
+        :raise InvalidGrammarException:
              pokud je symbol nevalidní
         """
         x = s.strip()
@@ -1204,10 +1386,12 @@ class Rule(object):
                         ta = Terminal.Attribute.createFrom(attribute)
                         if ta.type in attrTypes:
                             # typ argumentu se opakuje
-                            raise InvalidGrammarException(Errors.ErrorMessenger.CODE_GRAMMAR_ARGUMENT_REPEAT,
-                                                          Errors.ErrorMessenger.getMessage(
-                                                              Errors.ErrorMessenger.CODE_GRAMMAR_ARGUMENT_REPEAT).format(
-                                                              attribute))
+                            raise InvalidGrammarException(
+                                Errors.ErrorMessenger.CODE_GRAMMAR_ARGUMENT_REPEAT,
+                                Errors.ErrorMessenger.getMessage(
+                                    Errors.ErrorMessenger.CODE_GRAMMAR_ARGUMENT_REPEAT
+                                ).format(attribute),
+                            )
                         attrTypes.add(ta.type)
                         attrs.add(ta)
                         attribute = ""
@@ -1239,10 +1423,12 @@ class Rule(object):
 
                 if ta.type in attrTypes:
                     # typ argumentu se opakuje
-                    raise InvalidGrammarException(Errors.ErrorMessenger.CODE_GRAMMAR_ARGUMENT_REPEAT,
-                                                  Errors.ErrorMessenger.getMessage(
-                                                      Errors.ErrorMessenger.CODE_GRAMMAR_ARGUMENT_REPEAT).format(
-                                                      attribute))
+                    raise InvalidGrammarException(
+                        Errors.ErrorMessenger.CODE_GRAMMAR_ARGUMENT_REPEAT,
+                        Errors.ErrorMessenger.getMessage(
+                            Errors.ErrorMessenger.CODE_GRAMMAR_ARGUMENT_REPEAT
+                        ).format(attribute),
+                    )
 
                 attrTypes.add(ta.type)
                 attrs.add(ta)
@@ -1252,7 +1438,7 @@ class Rule(object):
     def getSymbols(self):
         """
         Vrací všechny terminály a neterminály.
-        
+
         :return: Množinu terminálů a neterminálů figurujících v pravidle.
         :rtype: set
         """
@@ -1272,7 +1458,7 @@ class Rule(object):
     def leftSide(self, value):
         """
         Nová levá strana pravidla.
-        
+
         :param value:Nová hodnota na levé straně prvidla.
         :type value: string
         :return: Neterminál.
@@ -1284,7 +1470,7 @@ class Rule(object):
     def rightSide(self):
         """
         Pravá strana pravidla.
-        
+
         :return: Terminály a neterminály (epsilon) na právé straně pravidla.
         :rtype: list
         """
@@ -1294,7 +1480,7 @@ class Rule(object):
     def rightSide(self, value):
         """
         Nová pravá strana pravidla.
-        
+
         :param value: Nová pravá strana.
         :type value: List()
         :return: Terminály a neterminály (epsilon) na právé straně pravidla.
@@ -1313,7 +1499,10 @@ class Rule(object):
 
     def __eq__(self, other):
         if isinstance(other, self.__class__):
-            return self._leftSide == other._leftSide and self._rightSide == other._rightSide
+            return (
+                self._leftSide == other._leftSide
+                and self._rightSide == other._rightSide
+            )
 
         return False
 
@@ -1321,14 +1510,14 @@ class Rule(object):
 class RulePrefixTree(object):
     """
     Prefixový strom vhodný pro získání skupin pravidel o stejných prefixech na pravé straně pravidla.
-    
+
     Strom je tvořen dalšími stromy.
     """
 
     def __init__(self, rules: Set[Rule], level=0):
         """
         Inicializace prefixoveho stromu.
-        
+
         :param rules: Pravidla pro zpracování
         :type rules: Set[Rule]
         :param level: Uroveň zanoření stromu.
@@ -1356,7 +1545,9 @@ class RulePrefixTree(object):
                 move = 1
                 toCompare = next(iter(x)).rightSide
                 try:
-                    while all(toCompare[level + move] == c.rightSide[level + move] for c in x):
+                    while all(
+                        toCompare[level + move] == c.rightSide[level + move] for c in x
+                    ):
                         # všichni začínají stejně a nevětví se tedy
                         # můžeme posunout délku prefixu
                         move += 1
@@ -1364,7 +1555,9 @@ class RulePrefixTree(object):
                     # překročeno, už nemůžeme dál
                     pass
 
-                self._offsprings[tuple(toCompare[level:level + move])] = RulePrefixTree(x, level + move)
+                self._offsprings[
+                    tuple(toCompare[level : level + move])
+                ] = RulePrefixTree(x, level + move)
 
     @property
     def rules(self):
@@ -1377,17 +1570,17 @@ class RulePrefixTree(object):
     def offsprings(self):
         """
         Potomci v prefixovém stromě v podobě dict.
-        
+
         Příklad
             1 2 3 4
             1 2 3
             1 2
             4 5
-        
+
         Vrátí:
             (1,2):RulePrefixTree
             (4,5):RulePrefixTree
-        :return: Dict kde key je nejdelší možný prefix (jako touple) 
+        :return: Dict kde key je nejdelší možný prefix (jako touple)
             než dojde k větvení a value je prefixový strom (pro větvení).
         :rtype: Dict[Tuple,RulePrefixTree]
         """
@@ -1399,17 +1592,19 @@ class RuleTemplate(object):
     Reprezentace šablony pro generování pravidla.
     """
 
-    TERMINAL_REGEX = re.compile(r"^(.+?)(\{(.*)\})?$")  # oddělení typu a attrbutů z terminálu
+    TERMINAL_REGEX = re.compile(
+        r"^(.+?)(\{(.*)\})?$"
+    )  # oddělení typu a attrbutů z terminálu
     VARIABLE_REGEX = re.compile(r"\$([A-z])+")  # hledání proměnncýh $x
 
     def __init__(self, fromString):
         """
         Vytvoření šablony pravidla z řetězce.
         formát pravidla: Neterminál -> Terminály a neterminály
-        
+
         :param fromString: Šablona v podobě řetězce.
         :type fromString: str
-        :raise InvalidGrammarException: 
+        :raise InvalidGrammarException:
              pokud je pravidlo v chybném formátu.
         """
         try:
@@ -1419,31 +1614,51 @@ class RuleTemplate(object):
             self._variables = set(self.VARIABLE_REGEX.findall(self._rightSide))
         except ValueError:
             # špatný formát šablony
-            raise InvalidGrammarException(Errors.ErrorMessenger.CODE_GRAMMAR_INVALID_FILE,
-                                          Errors.ErrorMessenger.getMessage(
-                                              Errors.ErrorMessenger.CODE_GRAMMAR_INVALID_FILE) + "\n\t" + fromString)
+            raise InvalidGrammarException(
+                Errors.ErrorMessenger.CODE_GRAMMAR_INVALID_FILE,
+                Errors.ErrorMessenger.getMessage(
+                    Errors.ErrorMessenger.CODE_GRAMMAR_INVALID_FILE
+                )
+                + "\n\t"
+                + fromString,
+            )
 
         if self.VARIABLE_REGEX.search(self._leftSide):
             # na levé straně se nesmí vyskytovat proměnné
-            raise InvalidGrammarException(Errors.ErrorMessenger.CODE_GRAMMAR_INVALID_FILE,
-                                          Errors.ErrorMessenger.getMessage(
-                                              Errors.ErrorMessenger.CODE_GRAMMAR_INVALID_FILE) + "\n\t" + fromString)
+            raise InvalidGrammarException(
+                Errors.ErrorMessenger.CODE_GRAMMAR_INVALID_FILE,
+                Errors.ErrorMessenger.getMessage(
+                    Errors.ErrorMessenger.CODE_GRAMMAR_INVALID_FILE
+                )
+                + "\n\t"
+                + fromString,
+            )
 
         self._leftSide = self._parseSymbol(self._leftSide)
 
         if isinstance(self._leftSide, str) or self._leftSide == Grammar.EMPTY_STR:
             # terminál nebo prázdný řetězec
             # ovšem v naší gramatice může být na levé straně pouze neterminál
-            raise InvalidGrammarException(Errors.ErrorMessenger.CODE_GRAMMAR_INVALID_FILE,
-                                          Errors.ErrorMessenger.getMessage(
-                                              Errors.ErrorMessenger.CODE_GRAMMAR_INVALID_FILE) + "\n\t" + fromString)
+            raise InvalidGrammarException(
+                Errors.ErrorMessenger.CODE_GRAMMAR_INVALID_FILE,
+                Errors.ErrorMessenger.getMessage(
+                    Errors.ErrorMessenger.CODE_GRAMMAR_INVALID_FILE
+                )
+                + "\n\t"
+                + fromString,
+            )
 
         # neterminál, vše je ok
         if not self._variables.issubset(set(self._leftSide.params)):
             # Některé proměnné jsou v pravidle na levé straně navíc.
-            raise InvalidGrammarException(Errors.ErrorMessenger.CODE_GRAMMAR_INVALID_FILE,
-                                          Errors.ErrorMessenger.getMessage(
-                                              Errors.ErrorMessenger.CODE_GRAMMAR_INVALID_FILE) + "\n\t" + fromString)
+            raise InvalidGrammarException(
+                Errors.ErrorMessenger.CODE_GRAMMAR_INVALID_FILE,
+                Errors.ErrorMessenger.getMessage(
+                    Errors.ErrorMessenger.CODE_GRAMMAR_INVALID_FILE
+                )
+                + "\n\t"
+                + fromString,
+            )
 
         # vytvoříme ze řetězců potřebné struktury
         self.nontermsOnRightSide = []
@@ -1457,34 +1672,49 @@ class RuleTemplate(object):
                     self.nontermsOnRightSide.append(act)
                     # na pravá straně musí mít všechny parametry neterminálu přiřazenou hodnotu
                     if not act.allParamsWithValue:
-                        raise InvalidGrammarException(Errors.ErrorMessenger.CODE_GRAMMAR_NONTERM_INVALID_SYNTAX,
-                                                      Errors.ErrorMessenger.getMessage(
-                                                          Errors.ErrorMessenger.
-                                                              CODE_GRAMMAR_NONTERM_INVALID_SYNTAX).format(act))
+                        raise InvalidGrammarException(
+                            Errors.ErrorMessenger.CODE_GRAMMAR_NONTERM_INVALID_SYNTAX,
+                            Errors.ErrorMessenger.getMessage(
+                                Errors.ErrorMessenger.CODE_GRAMMAR_NONTERM_INVALID_SYNTAX
+                            ).format(act),
+                        )
 
                 self._rightSide[i] = act
             except InvalidGrammarException as e:
                 # došlo k potížím s aktuálním pravidlem
-                raise InvalidGrammarException(Errors.ErrorMessenger.CODE_GRAMMAR_INVALID_FILE,
-                                              Errors.ErrorMessenger.getMessage(
-                                                  Errors.ErrorMessenger.CODE_GRAMMAR_INVALID_FILE)
-                                              + "\n\t" + x + "\t" + fromString
-                                              + "\n\t" + e.message)
+                raise InvalidGrammarException(
+                    Errors.ErrorMessenger.CODE_GRAMMAR_INVALID_FILE,
+                    Errors.ErrorMessenger.getMessage(
+                        Errors.ErrorMessenger.CODE_GRAMMAR_INVALID_FILE
+                    )
+                    + "\n\t"
+                    + x
+                    + "\t"
+                    + fromString
+                    + "\n\t"
+                    + e.message,
+                )
             except:
-                raise InvalidGrammarException(Errors.ErrorMessenger.CODE_GRAMMAR_INVALID_FILE,
-                                              Errors.ErrorMessenger.getMessage(
-                                                  Errors.ErrorMessenger.CODE_GRAMMAR_INVALID_FILE)
-                                              + "\n\t" + x + "\t" + fromString)
+                raise InvalidGrammarException(
+                    Errors.ErrorMessenger.CODE_GRAMMAR_INVALID_FILE,
+                    Errors.ErrorMessenger.getMessage(
+                        Errors.ErrorMessenger.CODE_GRAMMAR_INVALID_FILE
+                    )
+                    + "\n\t"
+                    + x
+                    + "\t"
+                    + fromString,
+                )
 
     @classmethod
     def _parseSymbol(cls, s):
         """
         Získá z řetězce symbol z gramatiky.
-        
+
         :param s: Řetězec, který by měl obsahovat neterminál, terminál či symbol prázdného řetězce.
         :type s: str
         :return: Symbol v gramatice
-        :raise InvalidGrammarException: 
+        :raise InvalidGrammarException:
              pokud je symbol nevalidní
         """
         x = s.strip()
@@ -1517,7 +1747,7 @@ class RuleTemplate(object):
     def generate(self, v):
         """
         Vygeneruje string v podobě finálního pravidla.
-        
+
         :param v: Hodnoty parametrů, použité pro generování
         :type v: Dict[str,str]
         :return: Vygenerované pravidlo
@@ -1530,12 +1760,18 @@ class RuleTemplate(object):
         # Máme všechny parametry?
         if v.keys() != self._leftSide.params.keys():
             # nemáme
-            raise InvalidGrammarException(Errors.ErrorMessenger.CODE_GRAMMAR_COULDNT_GENERATE_RULE,
-                                          Errors.ErrorMessenger.getMessage(
-                                              Errors.ErrorMessenger.CODE_GRAMMAR_COULDNT_GENERATE_RULE).format(
-                                              str(self)))
+            raise InvalidGrammarException(
+                Errors.ErrorMessenger.CODE_GRAMMAR_COULDNT_GENERATE_RULE,
+                Errors.ErrorMessenger.getMessage(
+                    Errors.ErrorMessenger.CODE_GRAMMAR_COULDNT_GENERATE_RULE
+                ).format(str(self)),
+            )
 
-        s = self._leftSide.generateLeft(v) + "->" + " ".join(str(x) for x in self._rightSide)
+        s = (
+            self._leftSide.generateLeft(v)
+            + "->"
+            + " ".join(str(x) for x in self._rightSide)
+        )
 
         # přiřadíme hodnoty proměnným
         for p, pval in v.items():
@@ -1546,7 +1782,7 @@ class RuleTemplate(object):
     def leftSide(self):
         """
         Levá strana pravidla.
-        
+
         :return: Neterminál.
         :rtype: Nonterminal
         """
@@ -1556,7 +1792,7 @@ class RuleTemplate(object):
     def leftSide(self, value):
         """
         Nová levá strana pravidla.
-        
+
         :param value:Nová hodnota na levé straně prvidla.
         :type value: Nonterminal
         """
@@ -1566,7 +1802,7 @@ class RuleTemplate(object):
     def rightSide(self):
         """
         Pravá strana pravidla.
-        
+
         :return: Terminály a neterminály (epsilon) na právé straně pravidla.
         :rtype: list
         """
@@ -1576,7 +1812,7 @@ class RuleTemplate(object):
     def rightSide(self, value):
         """
         Nová pravá strana pravidla.
-        
+
         :param value: Nová pravá strana.
         :type value: List()
         :return: Terminály a neterminály (epsilon) na právé straně pravidla.
@@ -1595,31 +1831,34 @@ class RuleTemplate(object):
 
     def __eq__(self, other):
         if isinstance(other, self.__class__):
-            return self._leftSide == other._leftSide and self._rightSide == other._rightSide
+            return (
+                self._leftSide == other._leftSide
+                and self._rightSide == other._rightSide
+            )
 
         return False
 
 
 class Symbol(object):
     """
-        Reprezentace symbolu na zásobníku
-        """
+    Reprezentace symbolu na zásobníku
+    """
 
     def __init__(self, s, isTerm=True, morph=True):
         """
-            Vytvoření symbolu s typu t.
-            :param s: Symbol
-            :type s:
-            :param isTerm: Druh terminál(True)/neterminál(False).
-            :type isTerm: bool
-            :param morph: Příznak zda se má slovo odpovídající termínálu ohýbat.
-                V případě neterminálu tento příznak určuje zda se mají slova odpovídající všem
-                terminálů, které je možné vygenerovat z daného neterminálu ohýbat/neohýbat.
-                Alternativní definice:
-                Flag, který určuje zda-li se nacházíme v části stromu, kde se slova mají ohýbat, či ne.
-                Jedná se o zohlednění příznaku self.NON_GEN_MORPH_SIGN z gramatiky.
-            :type morph: bool
-            """
+        Vytvoření symbolu s typu t.
+        :param s: Symbol
+        :type s:
+        :param isTerm: Druh terminál(True)/neterminál(False).
+        :type isTerm: bool
+        :param morph: Příznak zda se má slovo odpovídající termínálu ohýbat.
+            V případě neterminálu tento příznak určuje zda se mají slova odpovídající všem
+            terminálů, které je možné vygenerovat z daného neterminálu ohýbat/neohýbat.
+            Alternativní definice:
+            Flag, který určuje zda-li se nacházíme v části stromu, kde se slova mají ohýbat, či ne.
+            Jedná se o zohlednění příznaku self.NON_GEN_MORPH_SIGN z gramatiky.
+        :type morph: bool
+        """
 
         self._s = s
         self._isTerm = isTerm
@@ -1632,15 +1871,15 @@ class Symbol(object):
     @property
     def isTerm(self):
         """
-            True jedná se o terminál. False jedná se neterminál.
-            """
+        True jedná se o terminál. False jedná se neterminál.
+        """
         return self._isTerm
 
     @property
     def isMorph(self):
         """
-            True ohýbat. False jinak.
-            """
+        True ohýbat. False jinak.
+        """
         return self._morph
 
 
@@ -1649,6 +1888,7 @@ class Grammar(object):
     Používání a načtení gramatiky ze souboru.
     Provádí sémantickou analýzu
     """
+
     EMPTY_STR = "ε"  # Prázdný řetězec.
 
     # Má-li neterminál tuto značku na začátku znamená to, že všechny derivovatelné řetězce z něj
@@ -1684,11 +1924,11 @@ class Grammar(object):
         že pokud je namísto běžného SymbolRow[Terminal] použito SymbolRow[Token], tak pro daný symbol na zásobníku
         vybere všechna pravidla (vrací množinu pravidel), která je možné aplikovat pro daný token (jeden token může
         odpovídat více terminálům).
-    
+
         Vkládané klíče musí být Terminály.
-        
+
         Používá cache pro rychlejší vyhodnocení.
-        
+
         """
 
         def __init__(self, *arg, **kw):
@@ -1726,7 +1966,7 @@ class Grammar(object):
     def __init__(self, filePath, timeout=None):
         """
         Inicializace grammatiky jejim načtením ze souboru.
-        
+
         :param filePath: Cesta k souboru s gramatikou
         :type filePath: str
         :param timeout: TimeoutException pro syntaktickou analýzu. Po kolik max milisekundách má přestat.
@@ -1737,7 +1977,9 @@ class Grammar(object):
             InvalidGrammarException pokud je problém se samotnou gramtikou.
         """
 
-        self._terminals = {Terminal(Terminal.Type.EOF)}  # implicitní terminál je konec souboru
+        self._terminals = {
+            Terminal(Terminal.Type.EOF)
+        }  # implicitní terminál je konec souboru
         self._nonterminals = set()
         self._rules = set()
 
@@ -1759,13 +2001,13 @@ class Grammar(object):
     def _load(self, filePath):
         """
         Načtení gramatiky ze souboru.
-        
+
         :param filePath: Cesta k souboru s gramatikou.
         :type filePath: str
         :raise exception:
             Errors.ExceptionMessageCode pokud nemůže přečíst vstupní soubor.
             InvalidGrammarException pokud je problém se samotnou gramtikou.
-            
+
         """
         try:
 
@@ -1780,7 +2022,9 @@ class Grammar(object):
                 # první řádek je startovací neterminál
                 self._startS = self._procGFLine(firstNonEmptyLine)
                 if len(self._startS) == 0:
-                    raise InvalidGrammarException(code=Errors.ErrorMessenger.CODE_GRAMMAR_NO_START_SYMBOL)
+                    raise InvalidGrammarException(
+                        code=Errors.ErrorMessenger.CODE_GRAMMAR_NO_START_SYMBOL
+                    )
 
                 # parametrizované neterminály na levé straně pravidla
                 # Neterminál se mapuje na dvojici neterminál  a list pravidel, kde se neterminál
@@ -1803,8 +2047,11 @@ class Grammar(object):
                             raise InvalidGrammarException(
                                 Errors.ErrorMessenger.CODE_GRAMMAR_NONTERM_W_SAME_NAME_DIFF_PAR,
                                 Errors.ErrorMessenger.getMessage(
-                                    Errors.ErrorMessenger.CODE_GRAMMAR_NONTERM_W_SAME_NAME_DIFF_PAR).format(
-                                    str(r.leftSide), str(nontermsOnLeft[r.leftSide][0])))
+                                    Errors.ErrorMessenger.CODE_GRAMMAR_NONTERM_W_SAME_NAME_DIFF_PAR
+                                ).format(
+                                    str(r.leftSide), str(nontermsOnLeft[r.leftSide][0])
+                                ),
+                            )
                         nontermsOnLeft[r.leftSide][1].append(r)
                     except KeyError:
                         # první výskyt
@@ -1817,23 +2064,34 @@ class Grammar(object):
                 self._generateRules(nontermsOnLeft, Nonterminal(self._startS))
 
                 if len(self._rules) == 0:
-                    raise InvalidGrammarException(code=Errors.ErrorMessenger.CODE_GRAMMAR_NO_RULES)
+                    raise InvalidGrammarException(
+                        code=Errors.ErrorMessenger.CODE_GRAMMAR_NO_RULES
+                    )
 
                 if self._startS not in self._nonterminals:
                     # startovací symbol není v množině neterminálů
-                    raise InvalidGrammarException(code=Errors.ErrorMessenger.CODE_GRAMMAR_START_SYMBOL)
+                    raise InvalidGrammarException(
+                        code=Errors.ErrorMessenger.CODE_GRAMMAR_START_SYMBOL
+                    )
 
         except IOError:
-            raise Errors.ExceptionMessageCode(Errors.ErrorMessenger.CODE_COULDNT_READ_INPUT_FILE,
-                                              Errors.ErrorMessenger.getMessage(
-                                                  Errors.ErrorMessenger.CODE_COULDNT_READ_INPUT_FILE) + "\n\t" + filePath)
+            raise Errors.ExceptionMessageCode(
+                Errors.ErrorMessenger.CODE_COULDNT_READ_INPUT_FILE,
+                Errors.ErrorMessenger.getMessage(
+                    Errors.ErrorMessenger.CODE_COULDNT_READ_INPUT_FILE
+                )
+                + "\n\t"
+                + filePath,
+            )
 
     @staticmethod
-    def _addDefValNon(nontermsToRules: Dict[Nonterminal, Tuple[Nonterminal, List[RuleTemplate]]]):
+    def _addDefValNon(
+        nontermsToRules: Dict[Nonterminal, Tuple[Nonterminal, List[RuleTemplate]]]
+    ):
         """
         Přiřadí parametrizovaným neterminálům defaulní hodnoty pro parametry, kde není přiřazena hodnota.
         Pracuje in-situ.
-        
+
         :param nontermsToRules: Mapuje neterminály na dvojici neterminál a pravidla na jejichž levé straně
             se vyskytuje.
         :type nontermsToRules: Dict[Nonterminal,Tuple(Nonterminal, List[RuleTemplate])]
@@ -1852,16 +2110,21 @@ class Grammar(object):
                         raise InvalidGrammarException(
                             Errors.ErrorMessenger.CODE_GRAMMAR_NONTERMINAL_NO_CORESPONDING_RULE,
                             Errors.ErrorMessenger.getMessage(
-                                Errors.ErrorMessenger.CODE_GRAMMAR_NONTERMINAL_NO_CORESPONDING_RULE).format(n))
+                                Errors.ErrorMessenger.CODE_GRAMMAR_NONTERMINAL_NO_CORESPONDING_RULE
+                            ).format(n),
+                        )
 
-    def _generateRules(self, nontermsToRules: Dict[Nonterminal, Tuple[Nonterminal, List[RuleTemplate]]],
-                       s: Nonterminal):
+    def _generateRules(
+        self,
+        nontermsToRules: Dict[Nonterminal, Tuple[Nonterminal, List[RuleTemplate]]],
+        s: Nonterminal,
+    ):
         """
         Rozgenerování providlových šablon, do klasických pravidel.
-        
+
         Předpokládá, že již byly vloženy defaultní hodnoty a parametry k neterminálům na pravých stranách pravidel, kterým nějaký
         takový parametr úplně chyběl.
-        
+
         :param nontermsToRules: Mapuje neterminály na dvojici neterminál a pravidla na jejichž levé straně
             se vyskytuje.
         :type nontermsToRules: Dict[Nonterminal,Tuple(Nonterminal, List[RuleTemplate])]
@@ -1876,10 +2139,12 @@ class Grammar(object):
         try:
             templates = nontermsToRules[s][1]
         except KeyError:
-            raise InvalidGrammarException(Errors.ErrorMessenger.CODE_GRAMMAR_NONTERMINAL_NO_CORESPONDING_RULE,
-                                          Errors.ErrorMessenger.getMessage(
-                                              Errors.ErrorMessenger.CODE_GRAMMAR_NONTERMINAL_NO_CORESPONDING_RULE).format(
-                                              s))
+            raise InvalidGrammarException(
+                Errors.ErrorMessenger.CODE_GRAMMAR_NONTERMINAL_NO_CORESPONDING_RULE,
+                Errors.ErrorMessenger.getMessage(
+                    Errors.ErrorMessenger.CODE_GRAMMAR_NONTERMINAL_NO_CORESPONDING_RULE
+                ).format(s),
+            )
 
         for t in templates:
             # procházíme korespondující pravidla
@@ -1905,10 +2170,12 @@ class Grammar(object):
                                 n.params[varName] = s.params[varName]
                     except KeyError:
                         # nemáme asi hodnotu pro některou proměnnou
-                        raise InvalidGrammarException(Errors.ErrorMessenger.CODE_GRAMMAR_NONTERM_NO_PAR_VALUE,
-                                                      Errors.ErrorMessenger.getMessage(
-                                                          Errors.ErrorMessenger.CODE_GRAMMAR_NONTERM_NO_PAR_VALUE).format(
-                                                          n))
+                        raise InvalidGrammarException(
+                            Errors.ErrorMessenger.CODE_GRAMMAR_NONTERM_NO_PAR_VALUE,
+                            Errors.ErrorMessenger.getMessage(
+                                Errors.ErrorMessenger.CODE_GRAMMAR_NONTERM_NO_PAR_VALUE
+                            ).format(n),
+                        )
 
                     self._generateRules(nontermsToRules, n)
 
@@ -1936,7 +2203,7 @@ class Grammar(object):
     def _procGFLine(line):
         """
         Před zpracování řádku ze souboru s gramatikou. Odstraňuje komentáře a zbytečné bíle znaky.
-        
+
         :param line: Řádek ze souboru s gramatikou.
         :type line: str
         """
@@ -1946,7 +2213,7 @@ class Grammar(object):
         """
         Provede syntaktickou analýzu pro dané tokeny.
         Poslední token předpokládá EOF. Pokud jej neobsahuje, tak jej sám přidá na konec tokens.
-        
+
         :param tokens: Tokeny pro zpracování.
         :type tokens: list
         :return: Dvojici s listem listu pravidel určujících všechny možné derivace a list listů analyzovaných tokenů.
@@ -1962,8 +2229,10 @@ class Grammar(object):
             tokens.append(Token(None, Token.Type.EOF))
 
         # Přidáme na zásoník konec vstupu a počáteční symbol
-        stack = [Symbol(Terminal(Terminal.Type.EOF), True, True),
-                 Symbol(self._startS, False, self._startS[0] != self.NON_GEN_MORPH_SIGN)]
+        stack = [
+            Symbol(Terminal(Terminal.Type.EOF), True, True),
+            Symbol(self._startS, False, self._startS[0] != self.NON_GEN_MORPH_SIGN),
+        ]
         position = 0
 
         res = self.crawling(stack, tokens, position)
@@ -1976,10 +2245,10 @@ class Grammar(object):
         """
         Provádí analýzu zda-li posloupnost daných tokenů patří do jazyka definovaného gramatikou. Vrací posloupnost
         použitých pravidel. Nezastaví se na první vhodné posloupnosti pravidel, ale hledá všechny možné.
-        
+
         Tato metoda slouží především pro možnost implementace zpětného navracení při selhání, či hledání další vhodné
         posloupnosti pravidel.
-        
+
         :param stack: Aktuální obsah zásobníku. (modifukuje jej)
         :type stack: list(Symbol)
         :param tokens: posloupnost tokenů na vstupu
@@ -2012,9 +2281,15 @@ class Grammar(object):
                     # token odpovídá terminálu na zásobníku
                     position += 1
 
-                    aTokens.append(AnalyzedToken(token,
-                                                 False if token.type == Token.Type.ANALYZE_UNKNOWN else
-                                                 s.isMorph and s.val.morph, s.val))  # s je odpovídající terminál
+                    aTokens.append(
+                        AnalyzedToken(
+                            token,
+                            False
+                            if token.type == Token.Type.ANALYZE_UNKNOWN
+                            else s.isMorph and s.val.morph,
+                            s.val,
+                        )
+                    )  # s je odpovídající terminál
 
                 else:
                     # chyba rozdílný terminál na vstupu a zásobníku
@@ -2051,7 +2326,9 @@ class Grammar(object):
                             self.putRuleOnStack(r, newStack, s.isMorph)
 
                             # zkusíme zdali s tímto pravidlem uspějeme
-                            resRules, resATokens = self.crawling(newStack, tokens, position)
+                            resRules, resATokens = self.crawling(
+                                newStack, tokens, position
+                            )
 
                             if resRules and resATokens:
                                 # zaznamenáme aplikováná pravidla a analyzované tokeny
@@ -2083,7 +2360,7 @@ class Grammar(object):
     def putRuleOnStack(self, rule: Rule, stack, morph):
         """
         Vloží pravou stranu pravidla na zásobník.
-        
+
         :param rule: Pravidlo pro vložení.
         :type rule: Rule
         :param stack: Zásobník pro manipulaci. Obsahuje výsledek.
@@ -2093,12 +2370,16 @@ class Grammar(object):
         """
 
         for rulePart in reversed(rule.rightSide):
-            if rulePart != self.EMPTY_STR:  # prázdný symbol nemá smysl dávat na zásobník
+            if (
+                rulePart != self.EMPTY_STR
+            ):  # prázdný symbol nemá smysl dávat na zásobník
                 isTerminal = rulePart in self._terminals or rulePart == self.EMPTY_STR
                 # aby se jednalo o ohebnou část jména musíme se nacházet v ohebné částistromu (morph=true)
                 # a navíc pokud máme neterminál, tak musím zkontrolovat zda-li se nedostáváme do neohebné části
                 # rulePart.val[0]!=self.NON_GEN_MORPH_SIGN
-                shouldMorph = morph and (True if isTerminal else rulePart[0] != self.NON_GEN_MORPH_SIGN)
+                shouldMorph = morph and (
+                    True if isTerminal else rulePart[0] != self.NON_GEN_MORPH_SIGN
+                )
                 stack.append(Symbol(rulePart, isTerminal, shouldMorph))
 
     @classmethod
@@ -2106,7 +2387,7 @@ class Grammar(object):
         """
         Zjistí pro jaká slova má generovat tvary.
         Tím, že si tvoří z pravidel syntaktický strom.
-        
+
         :param rules: (MODIFIKUJE TENTO PARAMETR!) Pravidla získaná z analýzy (metoda analyse).
         :type rules: list
         :param morph: Pokud je false znamená to, že v této části syntaktického stromu negenerujeme tvary.
@@ -2119,7 +2400,9 @@ class Grammar(object):
 
         if morph:
             # zatím jsme mohli ohýbat, ale to se může nyní změnit
-            morph = actRule.leftSide[0] != cls.NON_GEN_MORPH_SIGN  # příznak toho, že v tomto stromu na tomto místě
+            morph = (
+                actRule.leftSide[0] != cls.NON_GEN_MORPH_SIGN
+            )  # příznak toho, že v tomto stromu na tomto místě
             # se ne/mají ohýbat slova
 
         morphMask = []  # maska určující zda-li se má ohýbat. True znamená, že ano.
@@ -2133,7 +2416,9 @@ class Grammar(object):
                 # lze dále rozgenerovávat
                 # přidáme masku od potomka
 
-                morphMask += cls.getMorphMask(rules, morph)  # rovnou odstraní použitá pravidla v rules
+                morphMask += cls.getMorphMask(
+                    rules, morph
+                )  # rovnou odstraní použitá pravidla v rules
             else:
                 # nelze
                 morphMask.append(morph)
@@ -2152,7 +2437,7 @@ class Grammar(object):
     def _removeAllUsellesSymbols(self):
         """
         Provede odstranění zbytečných symbolů.
-        
+
         Neterminál je zbytečný pokud se z něj nedá proderivovat k řetězci.
         Neterminál je také zbytečný pokud se z k němu nedá proderivovat z počátečního neterminálu.
         """
@@ -2177,8 +2462,12 @@ class Grammar(object):
                         change = True
 
         # odstraníme všechny pravidla obsahující nepovolené neterminály a i samotné nepovolené neterminály
-        self._rules = {r for r in self._rules if
-                       r.leftSide in deriveToTerminals and not any(s not in deriveToTerminals for s in r.rightSide)}
+        self._rules = {
+            r
+            for r in self._rules
+            if r.leftSide in deriveToTerminals
+            and not any(s not in deriveToTerminals for s in r.rightSide)
+        }
         self._nonterminals = {n for n in self._nonterminals if n in deriveToTerminals}
 
         # Teď budeme odstraňovat neterminály, ke kterým se nedostaneme z počátečního symbolu.
@@ -2223,7 +2512,9 @@ class Grammar(object):
                 # 0-vynechání
                 tmpRules.add(r)
 
-                allEmptyOnRSide = [i for i, n in enumerate(r.rightSide) if self._empty[n]]
+                allEmptyOnRSide = [
+                    i for i, n in enumerate(r.rightSide) if self._empty[n]
+                ]
 
                 for i in range(1, len(allEmptyOnRSide) + 1):
                     # vynecháváme 1-x symbolů
@@ -2231,7 +2522,11 @@ class Grammar(object):
                         # vybraná kombinace pro odstranění
                         newRule = copy.copy(r)
                         # upravíme pravou stranu
-                        newRule.rightSide = [s for pi, s in enumerate(newRule.rightSide) if pi not in shouldRemove]
+                        newRule.rightSide = [
+                            s
+                            for pi, s in enumerate(newRule.rightSide)
+                            if pi not in shouldRemove
+                        ]
                         if len(newRule.rightSide) > 0:
                             tmpRules.add(newRule)
         if self._empty[self._startS]:
@@ -2251,24 +2546,34 @@ class Grammar(object):
         # zjistíme takzvané jednotkové páry (Unit pair).
         # X,Y z N je jednotkový pár, pokud  X =>* Y
 
-        unitPairs = {r for r in self._rules if
-                     len(r.rightSide) == 1 and not isinstance(r.rightSide[0], Terminal) and r.rightSide[
-                         0] != self.EMPTY_STR}  # na pravé straně je pouze 1 neterminál
+        unitPairs = {
+            r
+            for r in self._rules
+            if len(r.rightSide) == 1
+            and not isinstance(r.rightSide[0], Terminal)
+            and r.rightSide[0] != self.EMPTY_STR
+        }  # na pravé straně je pouze 1 neterminál
         numberOfPairs = 0
         while numberOfPairs != len(unitPairs):
             numberOfPairs = len(unitPairs)
 
             tmpUnitPair = unitPairs.copy()
             for unitPairRule in tmpUnitPair:  # (X->Y)
-                for unitPairRuleOther in {r for r in tmpUnitPair if r.leftSide == unitPairRule.rightSide[0]}:  # (Y->Z)
+                for unitPairRuleOther in {
+                    r for r in tmpUnitPair if r.leftSide == unitPairRule.rightSide[0]
+                }:  # (Y->Z)
                     newRule = copy.copy(unitPairRule)
                     newRule.rightSide = [unitPairRuleOther.rightSide[0]]
 
-                    if unitPairRuleOther.leftSide[0] == self.NON_GEN_MORPH_SIGN and \
-                            unitPairRuleOther.rightSide[0][0] != self.NON_GEN_MORPH_SIGN:
+                    if (
+                        unitPairRuleOther.leftSide[0] == self.NON_GEN_MORPH_SIGN
+                        and unitPairRuleOther.rightSide[0][0] != self.NON_GEN_MORPH_SIGN
+                    ):
                         # Nesmíme zapomenout přidat příznak, že se nemá ohýbat,
                         # pokud je třeba.
-                        newRule.rightSide[0] = self.NON_GEN_MORPH_SIGN + newRule.rightSide[0]
+                        newRule.rightSide[0] = (
+                            self.NON_GEN_MORPH_SIGN + newRule.rightSide[0]
+                        )
 
                     unitPairs.add(newRule)  # (X->Z)
 
@@ -2277,15 +2582,23 @@ class Grammar(object):
         self._rules -= unitPairs
 
         for unitPairRule in unitPairs:  # X->A
-            for r in {oldR for oldR in oldRules if oldR.leftSide == unitPairRule.rightSide[0]}:  # A->w
+            for r in {
+                oldR for oldR in oldRules if oldR.leftSide == unitPairRule.rightSide[0]
+            }:  # A->w
 
-                if len(r.rightSide) > 1 or (isinstance(r.rightSide[0], Terminal) or r.rightSide[0] == self.EMPTY_STR):
+                if len(r.rightSide) > 1 or (
+                    isinstance(r.rightSide[0], Terminal)
+                    or r.rightSide[0] == self.EMPTY_STR
+                ):
                     # na pravé straně není pouze daný neterminál
 
                     newRule = copy.copy(unitPairRule)
                     newRule.rightSide = r.rightSide
 
-                    if newRule.leftSide[0] != self.NON_GEN_MORPH_SIGN and r.leftSide[0] == self.NON_GEN_MORPH_SIGN:
+                    if (
+                        newRule.leftSide[0] != self.NON_GEN_MORPH_SIGN
+                        and r.leftSide[0] == self.NON_GEN_MORPH_SIGN
+                    ):
                         # Nesmíme zapomenout přidat příznak, že se nemá ohýbat, ale tentokráto to musíme
                         # přesunout přímo to terminálu.
                         for s in newRule.rightSide:
@@ -2297,7 +2610,7 @@ class Grammar(object):
     def _makeGroups(self):
         """
         Provede slučování pravidel na základě prefixů. Vhodné pro zjednodušení procesu analýzy.
-        
+
         Příklad:
             S->!NUMERIC 1{g=F, note=jS, n=S, c=1, t=S, r="^.*ová$"}
             S->!NUMERIC 1{g=F, note=jS, n=S, c=1, t=S, r="^.*ová$"} !T_GROUP
@@ -2307,10 +2620,10 @@ class Grammar(object):
             S->!NUMERIC 1{g=F, note=jS, n=S, c=1, t=S, r="^.*ová$"} NOUN_GROUP_START PREP_GROUP !T_GROUP
             S->!NUMERIC 1{g=F, note=jS, n=S, c=1, t=S, r="^.*ová$"} PREP_GROUP
             S->!NUMERIC 1{g=F, note=jS, n=S, c=1, t=S, r="^.*ová$"} PREP_GROUP !T_GROUP
-            
+
             S -> NUM(n=S,g=M) ADJ_GROUP_MANDATORY(n=S,g=M) END
             S -> NUM(n=S,g=M) ADJ_GROUP_MANDATORY(n=S,g=M) LOC2(n=S,g=M) END
-            
+
             Převede na:
                 S->!NUMERIC 1{g=F, note=jS, n=S, c=1, t=S, r="^.*ová$"} S$1
                 S$1-> ε
@@ -2321,12 +2634,12 @@ class Grammar(object):
                 S$2 -> !T_GROUP
                 S$2 -> PREP_GROUP
                 S$2 -> PREP_GROUP !T_GROUP
-                S$3-> !T_GROUP 
-                S$3-> ε         
+                S$3-> !T_GROUP
+                S$3-> ε
                 S -> NUM(n=S,g=M) ADJ_GROUP_MANDATORY(n=S,g=M) S$4
                 S$4-> ε
                 S$4-> LOC2(n=S,g=M) END
-        
+
         """
 
         searchAccordingToLeftSide = {}
@@ -2347,7 +2660,7 @@ class Grammar(object):
     def _makePrefixGroups(self, leftSide, prefTree):
         """
         Vytvoři nová pravidla na základě prefixového stromu.
-        
+
         :param leftSide: Levá strana pravidel, které se mají vytvářet.
             Pokud dojde v rekurzi ke větvení, tak přidává pro rozlyšení hodnotu čítače k názvu.
         :type leftSide: str
@@ -2371,14 +2684,21 @@ class Grammar(object):
                 # větvíme
                 # budeme potřebovat nový neterminál pro
                 # reprezentaci větve
-                newNonTerm = leftSide + self.GEN_NONTERM_CNT_SEPPARATOR + str(newNontermsCnt)
+                newNonTerm = (
+                    leftSide + self.GEN_NONTERM_CNT_SEPPARATOR + str(newNontermsCnt)
+                )
                 newNontermsCnt += 1
 
                 # vytvoříme novou větev
-                rules.add(Rule(fromString=None,
-                               terminals=self._terminals,
-                               nonterminals=self._nonterminals, leftSide=leftSide,
-                               rightSide=list(prefix) + [newNonTerm]))
+                rules.add(
+                    Rule(
+                        fromString=None,
+                        terminals=self._terminals,
+                        nonterminals=self._nonterminals,
+                        leftSide=leftSide,
+                        rightSide=list(prefix) + [newNonTerm],
+                    )
+                )
 
                 # rekurzivně se zanoříme do větve
                 rules |= self._makePrefixGroups(newNonTerm, tree)
@@ -2393,27 +2713,37 @@ class Grammar(object):
                     # tak i dalších sdílejících prefix.
                     # 1] (1,2) (3) (4)    {1}
                     # 2] (1,2) (3)        {1,2}
-                    rules.add(Rule(fromString=None,
-                                   terminals=self._terminals,
-                                   nonterminals=self._nonterminals, leftSide=leftSide,
-                                   rightSide=[self.EMPTY_STR]))
+                    rules.add(
+                        Rule(
+                            fromString=None,
+                            terminals=self._terminals,
+                            nonterminals=self._nonterminals,
+                            leftSide=leftSide,
+                            rightSide=[self.EMPTY_STR],
+                        )
+                    )
 
                 else:
-                    rules.add(Rule(fromString=None,
-                                   terminals=self._terminals,
-                                   nonterminals=self._nonterminals,
-                                   leftSide=leftSide, rightSide=list(prefix)))
+                    rules.add(
+                        Rule(
+                            fromString=None,
+                            terminals=self._terminals,
+                            nonterminals=self._nonterminals,
+                            leftSide=leftSide,
+                            rightSide=list(prefix),
+                        )
+                    )
 
                     # v našem modelovém případu to odpovídá:
                     #    1] (1,2) (3) (4)    {1}
-                    #    4] (3,4)            {4}    
+                    #    4] (3,4)            {4}
 
         return rules
 
     def _makeTable(self):
         """
         Vytvoření parsovací tabulky.
-        
+
         """
         self._makeEmptySets()
         # COULD BE DELETED print("empty", self._empty)
@@ -2434,7 +2764,10 @@ class Grammar(object):
         """
 
         # inicializace tabulky
-        self._table = {n: self.ParsingTableSymbolRow({t: set() for t in self._terminals}) for n in self._nonterminals}
+        self._table = {
+            n: self.ParsingTableSymbolRow({t: set() for t in self._terminals})
+            for n in self._nonterminals
+        }
 
         # zjištění pravidla pro daný terminál na vstupu a neterminál na zásobníku
         for r in self._rules:
@@ -2467,13 +2800,17 @@ class Grammar(object):
         """
         Získání "množin" empty (v aktuální gramatice) v podobě dict s příznaky True/False,
          zda daný symbol lze derivovat na prázdný řetězec.
-         
-        Jedná se o Dict s příznaky: True lze derivovat na prázdný řetězec, či False nelze. 
+
+        Jedná se o Dict s příznaky: True lze derivovat na prázdný řetězec, či False nelze.
 
         """
 
-        self._empty = {t: False for t in self._terminals}  # terminály nelze derivovat na prázdný řetězec
-        self._empty[self.EMPTY_STR] = True  # prázdný řetězec mohu triviálně derivovat na prázdný řetězec
+        self._empty = {
+            t: False for t in self._terminals
+        }  # terminály nelze derivovat na prázdný řetězec
+        self._empty[
+            self.EMPTY_STR
+        ] = True  # prázdný řetězec mohu triviálně derivovat na prázdný řetězec
 
         for N in self._nonterminals:
             # nonterminály inicializujeme na false
@@ -2502,13 +2839,15 @@ class Grammar(object):
 
     def _makeFirstSets(self):
         """
-        Získání "množin" first (v aktuální gramatice) v podobě dict s množinami 
+        Získání "množin" first (v aktuální gramatice) v podobě dict s množinami
         prvních terminálů derivovatelných pro daný symbol.
-        
+
         Před zavoláním této metody je nutné zavolat _makeEmptySets!
         """
 
-        self._first = {t: {t} for t in self._terminals}  # terminály mají jako prvního samy sebe
+        self._first = {
+            t: {t} for t in self._terminals
+        }  # terminály mají jako prvního samy sebe
         self._first[self.EMPTY_STR] = set()
 
         # inicializace pro neterminály
@@ -2542,7 +2881,7 @@ class Grammar(object):
     def _makeFollowSets(self):
         """
         Získání množiny všech terminálů, které se mohou vyskytovat vpravo od nějakého neterminálu A ve větné formě.
-        
+
         Před zavoláním této metody je nutné zavolat _makeEmptySets, _makeFirstSets!
 
         """
@@ -2560,13 +2899,17 @@ class Grammar(object):
                         # máme neterminál
                         if i + 1 < len(r.rightSide):
                             # nejsme na konci
-                            tmp = self._follow[x] | self._firstFromSeq(r.rightSide[i + 1:])
+                            tmp = self._follow[x] | self._firstFromSeq(
+                                r.rightSide[i + 1 :]
+                            )
                             if tmp != self._follow[x]:
                                 # zmena
                                 self._follow[x] = tmp
                                 change = True
 
-                        if i + 1 >= len(r.rightSide) or self._emptySeq(r.rightSide[i + 1:]):
+                        if i + 1 >= len(r.rightSide) or self._emptySeq(
+                            r.rightSide[i + 1 :]
+                        ):
                             # v pravo je prázdno nebo se proderivujeme k prázdnu
 
                             tmp = self._follow[x] | self._follow[r.leftSide]
@@ -2579,25 +2922,27 @@ class Grammar(object):
         """
         Vytvoření množiny Predict(A → x), která je množina všech terminálů, které mohou být aktuálně nejlevěji
         vygenerovány, pokud pro libovolnou větnou formu použijeme pravidlo A → x.
-        
+
         Před zavoláním této metody je nutné zavolat _makeEmptySets, _makeFirstSets, _makeFollowSets!
-        
+
         """
 
         self._predict = {}
 
         for r in self._rules:
             if self._emptySeq(r.rightSide):
-                self._predict[r] = self._firstFromSeq(r.rightSide) | self._follow[r.leftSide]
+                self._predict[r] = (
+                    self._firstFromSeq(r.rightSide) | self._follow[r.leftSide]
+                )
             else:
                 self._predict[r] = self._firstFromSeq(r.rightSide)
 
     def _firstFromSeq(self, seq):
         """
         Získání množiny first z posloupnosti terminálů a neterminálů
-        
+
         Před zavoláním této metody je nutné zavolat _makeEmptySets, _makeFirstSets!
-        
+
         :param seq: Posloupnost terminálů a neterminálů.
         :type seq: list
         :return: Množina first.
@@ -2620,9 +2965,9 @@ class Grammar(object):
     def _emptySeq(self, seq):
         """
         Určení množiny empty pro posloupnost terminálů a neterminálů
-        
+
         Před zavoláním této metody je nutné zavolat _makeEmptySets!
-        
+
         :param seq: Posloupnost terminálů a neterminálů.
         :type seq: list
         :return: True proderivuje se k prázdnému řetězce. Jinak false.
