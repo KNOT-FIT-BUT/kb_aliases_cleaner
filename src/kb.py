@@ -10,8 +10,20 @@ Tools for simplified manipulation with KB
 import json
 import subprocess
 import sys
+import re
 
 from shlex import split as shlex_split
+
+
+GENERIC_REGEX = re.compile('^<__generic__>')
+PERSON_REGEX = re.compile('^<person>')
+GROUP_REGEX = re.compile('^<group>')
+ARTIST_REGEX = re.compile('^<artist>')
+GEOGRAPHICAL_REGEX = re.compile('^<geographical>')
+EVENT_REGEX = re.compile('^<event>')
+ORGANIZATION_REGEX = re.compile('^<organization>')
+STATS_REGEX = re.compile('^<__stats__>')
+KB_HEAD_POS = 3
 
 
 def get_kb_toc(kb_content: list) -> [int, int, int, int, int]:
@@ -83,3 +95,49 @@ def add_tool_version(repo_dir: str, tools_versions: dict) -> None:
         .strip()
     ):
         tools_versions[repo_name] += "_dirty"
+
+
+def process_line(line, data_dict, category, start_count=0) -> int:
+    for idx, elem in enumerate(line, start_count):
+        if elem.partition('>')[2]:
+            elem = elem.partition('>')[2]
+        if elem.partition('}')[2]:
+            elem = elem.partition('}')[2]
+        try:
+            data_dict[category][elem.replace(' ', '_').lower()] = idx
+        except KeyError:
+            data_dict[category] = {}
+            data_dict[category][elem.replace(' ', '_').lower()] = idx
+    return len(line)
+
+
+def get_kb_head_positions(kb_filename='KB.tsv'):
+    with open(kb_filename) as kb_file:
+        kb_header = {}
+        generic_type_len: int = 0
+        lines = kb_file.readlines()
+        for line in lines[get_kb_toc(lines)[KB_HEAD_POS]:]:
+            if not line.strip():
+                break
+            line = line.strip().split('\t')
+            if GENERIC_REGEX.match(line[0]):
+                generic_type_len = process_line(line, kb_header, 'generic')
+            elif PERSON_REGEX.match(line[0]):
+                process_line(line, kb_header, 'person', generic_type_len)
+            elif GROUP_REGEX.match(line[0]):
+                process_line(line, kb_header, 'group', generic_type_len)
+            elif ARTIST_REGEX.match(line[0]):
+                process_line(line, kb_header, 'artist', generic_type_len)
+            elif GEOGRAPHICAL_REGEX.match(line[0]):
+                process_line(line, kb_header, 'geographical', generic_type_len)
+            elif EVENT_REGEX.match(line[0]):
+                process_line(line, kb_header, 'event', generic_type_len)
+            elif ORGANIZATION_REGEX.match(line[0]):
+                process_line(line, kb_header, 'organization', generic_type_len)
+            elif STATS_REGEX.match(line[0]):
+                process_line(line, kb_header, 'stats', generic_type_len)
+            else:
+                print('error: new kind of KB Type encountered, please update\
+                      this script')
+                exit(1)
+    return kb_header
