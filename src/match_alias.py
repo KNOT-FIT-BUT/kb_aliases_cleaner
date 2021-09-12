@@ -9,19 +9,21 @@ contact: xkrizd03@fit.vutbr.cz
 """
 
 import sys
-from .kb import get_toc_kb_data
+import kb
 
 ALIAS_MATCH = 1
 NUM_ALIAS = 2
 NAME = "name"
 LINE = "line"
 
+KB_HEAD = kb.get_kb_head_positions()
+
 POS_MATCH_LINE = 0
-POS_TYPE = 1
-POS_NAME = 2
-POS_DIS_NAME = 3
-POS_ALIAS = 4
-POS_GENDER = 12
+POS_TYPE = KB_HEAD["generic"]["type"]
+POS_NAME = KB_HEAD["generic"]["name"]
+POS_DIS_NAME = KB_HEAD["generic"]["disambiguation_name"]
+POS_ALIAS = KB_HEAD["generic"]["aliases"]
+POS_GENDER = KB_HEAD["person"]["gender"]
 
 ODD_CHARACTERS = [".", ",", "/", "_", "\\", "|", "+", "*", "&", "%", "$"]
 
@@ -96,7 +98,7 @@ def match_aliases(filename, aliases, aliases_dict, match_dict):
     in corresponding dictionaries"""
     with open(filename) as knowledge_base:
         knowledge_base_content = knowledge_base.readlines()
-        toc_kb_data = get_toc_kb_data(kb_content=knowledge_base_content)
+        toc_kb_data = kb.get_toc_kb_data(kb_content=knowledge_base_content)
         for idx, line in enumerate(
             knowledge_base_content[toc_kb_data:], start=toc_kb_data + 1
         ):
@@ -226,7 +228,7 @@ def find_problematic_aliases(filename, alias_dict):
     only one word long"""
     with open(filename) as knowledge_base:
         knowledge_base_content = knowledge_base.readlines()
-        toc_kb_data = get_toc_kb_data(kb_content=knowledge_base_content)
+        toc_kb_data = kb.get_toc_kb_data(kb_content=knowledge_base_content)
         for idx, line in enumerate(
             knowledge_base_content[toc_kb_data:], start=toc_kb_data + 1
         ):
