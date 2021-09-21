@@ -85,14 +85,15 @@ if __name__ == "__main__":
 
     match_alias.match_aliases(KB_PATH, aliases, alias_dict, match_dict)
     match_alias.remove_useless_matches(alias_dict, match_dict, THRESHOLD)
-    match_alias.write_numbered_aliases("num_aliases.tsv", alias_dict)
 
     if DEBUG == True:
+        match_alias.write_numbered_aliases("num_aliases.tsv", alias_dict)
         match_alias.write_matches("aliases_match.tsv", match_dict)
         match_alias.write_aliases("aliases.txt", alias_dict)
 
     # Using namegen to determinate targets
     print("[*] Starting prep_namegen.py")
+    print("[*] Generating temporal files")
     subprocess.call(["python3", f"{ROOTDIR}/src/prep_namegen.py"])
     print("[*] Starting namegen and generating names")
     FNULL = open(os.devnull, "w")
@@ -108,9 +109,12 @@ if __name__ == "__main__":
         stderr=subprocess.STDOUT,
     )
 
-    targets = destroy_alias.get_items("num_aliases.tsv", TARGETS)
     given_names = destroy_alias.get_items("namegen_gn_output.txt", GN_NAMES)
+    targets = destroy_alias.get_items(None, TARGETS, target_dict=alias_dict)
 
+    print("[*] Generating temporal files")
+    os.remove("namegen_input.txt")
+    os.remove("namegen_gn_output.txt")
     targets.intersection_update(given_names)
 
     with open(KB_PATH, "r") as KB:
