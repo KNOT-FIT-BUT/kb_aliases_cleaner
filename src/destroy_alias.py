@@ -16,14 +16,23 @@ TARGETS = 0
 GN_NAMES = 0
 
 
-def get_items(filename, column, separator="\t"):
+def get_items(filename, column, separator="\t", target_dict=None):
     """Returns word located in columb of a file defined as filename. Each
     line is separated with separator (default value = '\t')"""
     items = set()
-    with open(filename, "r") as opened_file:
-        file_content = opened_file.readlines()
-    for line in file_content:
-        items.add(line.split(separator)[column])
+    if not target_dict:
+        with open(filename, "r") as opened_file:
+            file_content = opened_file.readlines()
+        for line in file_content:
+            items.add(line.split(separator)[column])
+    else:
+        for key in target_dict:
+            item = (
+                    key,
+                    target_dict[key].match_cnt,
+                    target_dict.match_sources[0]
+            )
+            items.add(item[column])
     return items
 
 
