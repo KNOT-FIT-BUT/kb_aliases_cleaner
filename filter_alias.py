@@ -93,9 +93,17 @@ if __name__ == "__main__":
 
     with open("namegen_input.txt", "w") as ni:
         for key in alias_dict:
-            ni.write(
-                alias_dict[key].split("#")[0]
-            )
+            line = alias_dict[key].split("#")[0]
+            names = str(alias_dict[key].split('\t')[2])
+            for name in names.split('|'):
+                name, gender = name.split('#')
+                ni.write(
+                    name
+                    + "\t\t"
+                    + "P:::"
+                    + gender
+                    + "\n"
+                )
 
     # Using namegen to determinate targets
     print("[*] Starting prep_namegen.py")
