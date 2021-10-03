@@ -93,8 +93,10 @@ if __name__ == "__main__":
 
     with open("namegen_input.txt", "w") as ni:
         for key in alias_dict:
+            line = alias_dict[key].split("#")[0]
+            print(line)
             ni.write(
-                alias_dict[key].split("#")[0]
+                line
             )
 
     # Using namegen to determinate targets
