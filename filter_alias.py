@@ -15,9 +15,9 @@ import getopt
 import subprocess
 import src.match_alias as match_alias
 import src.destroy_alias as destroy_alias
+import kb
 
 from src.destroy_alias import TARGETS, GN_NAMES, POS_ALIAS
-from src.kb import add_tool_version, get_kb_toc
 
 
 FLAGS_SEPARATOR = "#"
@@ -91,6 +91,12 @@ if __name__ == "__main__":
         match_alias.write_matches("aliases_match.tsv", match_dict)
         match_alias.write_aliases("aliases.txt", alias_dict)
 
+    with open("namegen_input.txt", "w") as ni:
+        for key in alias_dict:
+            ni.write(
+                alias_dict[key].split("#")[0]
+            )
+
     # Using namegen to determinate targets
     print("[*] Starting prep_namegen.py")
     print("[*] Generating temporal files")
@@ -122,10 +128,10 @@ if __name__ == "__main__":
 
     KB = open(OUTPUT_PATH, "w")
 
-    _, _, toc_kb_tools_versions, _, toc_kb_data = get_kb_toc(kb_content=KB_lines)
+    _, _, toc_kb_tools_versions, _, toc_kb_data = kb.get_kb_toc(kb_content=KB_lines)
     if toc_kb_tools_versions:
         tools_versions = json.loads(KB_lines[toc_kb_tools_versions])
-        add_tool_version(
+        kb.add_tool_version(
             repo_dir=os.path.dirname(os.path.realpath(__file__)),
             tools_versions=tools_versions,
         )

@@ -9,7 +9,7 @@ provides given names to be filtered.
 @contact: xkrizd03@fit.vutbr.cz
 """
 
-from .kb import get_toc_kb_data
+from kb import get_toc_kb_data
 
 POS_ALIAS = 4
 TARGETS = 0
