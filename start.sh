@@ -66,12 +66,14 @@ fi
 echo "[*] Starting filter_alias.py"
 `dirname $0`/filter_alias.py $DEBUG $DESTROY $THRESHOLD $PATH_TO_KB $OUTPUT_FILE
 echo "[*] Cleaning up"
-if [ -e "num_aliases.tsv" ]; then
-	rm "num_aliases.tsv"
-fi
-if [ -e "namegen_gn_output.txt" ]; then
-	rm "namegen_gn_output.txt"
-fi
-if [ -e "namegen_input.txt" ]; then
-	rm "namegen_input.txt"
+if [ "DEBUG" = "" ]; then
+	if [ -e "num_aliases.tsv" ]; then
+		rm "num_aliases.tsv"
+	fi
+	if [ -e "namegen_gn_output.txt" ]; then
+		rm "namegen_gn_output.txt"
+	fi
+	if [ -e "namegen_input.txt" ]; then
+		rm "namegen_input.txt"
+	fi
 fi
