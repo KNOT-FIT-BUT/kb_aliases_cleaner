@@ -17,8 +17,8 @@ DEBUG=""
 DESTROY=""
 PATH_KB=0
 THRESHOLD=
-PATH_TO_KB=unset
-OUTPUT_FILE=unset
+PATH_TO_KB=
+OUTPUT_FILE=
 DOWNLOAD_KB=false
 
 PARSED_ARGS=$(getopt -a -n run_filter_alias -o hkt: --long destroy,debug,input-file:,output-file: -- "$@")
@@ -69,11 +69,5 @@ echo "[*] Cleaning up"
 if [ "DEBUG" = "" ]; then
 	if [ -e "num_aliases.tsv" ]; then
 		rm "num_aliases.tsv"
-	fi
-	if [ -e "namegen_gn_output.txt" ]; then
-		rm "namegen_gn_output.txt"
-	fi
-	if [ -e "namegen_input.txt" ]; then
-		rm "namegen_input.txt"
 	fi
 fi
