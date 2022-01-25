@@ -25,6 +25,7 @@ FLAG_ALIAS_DELETED = "mark=deleted"
 
 
 def mark_aliases(arr, targets):
+    """Marks the alias as deleted, for non-destructive run for the script"""
     for i in range(len(arr)):
         alias_with_flags = arr[i].split(FLAGS_SEPARATOR)
         if alias_with_flags[0] in targets:
@@ -91,18 +92,20 @@ if __name__ == "__main__":
         match_alias.write_matches("aliases_match.tsv", match_dict)
         match_alias.write_aliases("aliases.txt", alias_dict)
 
+    print("[*] Generating temporal input file for namegen")
     with open("namegen_input.txt", "w") as ni:
         for key in alias_dict:
-            line = alias_dict[key].split("#")[0]
-            print(line)
-            ni.write(
-                line
-            )
+            names = str(alias_dict[key]).split("\t")[2]
+            for name in names.split("|"):
+                name, gender = name.split("#")
+                ni.write(
+                    name
+                    + "\t\t"
+                    + "P:::"
+                    + gender
+                    + "\n"
+                )
 
-    # Using namegen to determinate targets
-    print("[*] Starting prep_namegen.py")
-    print("[*] Generating temporal files")
-    subprocess.call(["python3", f"{ROOTDIR}/src/prep_namegen.py"])
     print("[*] Starting namegen and generating names")
     FNULL = open(os.devnull, "w")
     subprocess.call(
@@ -111,6 +114,7 @@ if __name__ == "__main__":
             f"{ROOTDIR}/namegen/namegen.py",
             "-gn",
             "namegen_gn_output.txt",
+            "<",
             "namegen_input.txt",
         ],
         stdout=FNULL,
@@ -120,9 +124,10 @@ if __name__ == "__main__":
     given_names = destroy_alias.get_items("namegen_gn_output.txt", GN_NAMES)
     targets = destroy_alias.get_items(None, TARGETS, target_dict=alias_dict)
 
-    print("[*] Generating temporal files")
+    print("[*] Removing temporal files")
     os.remove("namegen_input.txt")
     os.remove("namegen_gn_output.txt")
+
     targets.intersection_update(given_names)
 
     with open(KB_PATH, "r") as KB:
