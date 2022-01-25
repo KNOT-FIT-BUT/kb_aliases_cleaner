@@ -1,2 +1,5 @@
 src/__pycache__
 KB.tsv
+venv/
+*.txt
+*.tsv
