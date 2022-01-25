@@ -92,31 +92,24 @@ if __name__ == "__main__":
         match_alias.write_aliases("aliases.txt", alias_dict)
 
     print("[*] Generating temporal input file for namegen")
-    with open("namegen_input.txt", "w") as ni:
-        for key in alias_dict:
-            names = str(alias_dict[key]).split("\t")[2]
-            for name in names.split("|"):
-                name, gender = name.split("#")
-                ni.write(
-                    name
-                    + "\t\t"
-                    + "P:::"
-                    + gender
-                    + "\n"
-                )
-                print(name, gender)
+    namegen_input = []
+    for key in alias_dict:
+        names = str(alias_dict[key]).split("\t")[2]
+        for name in names.split("|"):
+            name, gender = name.split("#")
+            namegen_str = name + "\t\t" + "P:::" + gender + "\n"
+            namegen_input.append(namegen_str)
 
     print("[*] Starting namegen and generating names")
     FNULL = open(os.devnull, "w")
-    subprocess.call(
+    subprocess.run(
         [
             "python3",
             f"{ROOTDIR}/namegen/namegen.py",
             "-gn",
             "namegen_gn_output.txt",
-            "<",
-            "namegen_input.txt",
         ],
+        input='\n'.join(namegen_input).encode('utf-8'),
         stdout=FNULL,
         stderr=subprocess.STDOUT,
     )
@@ -125,7 +118,6 @@ if __name__ == "__main__":
     targets = destroy_alias.get_items(None, TARGETS, target_dict=alias_dict)
 
     print("[*] Removing temporal files")
-    os.remove("namegen_input.txt")
     os.remove("namegen_gn_output.txt")
 
     targets.intersection_update(given_names)
