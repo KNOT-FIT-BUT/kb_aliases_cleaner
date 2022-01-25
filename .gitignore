@@ -3,3 +3,4 @@ KB.tsv
 venv/
 *.txt
 *.tsv
+__pycache__

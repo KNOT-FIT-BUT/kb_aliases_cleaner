@@ -18,6 +18,7 @@ import src.destroy_alias as destroy_alias
 import kb
 
 from src.destroy_alias import TARGETS, GN_NAMES, POS_ALIAS
+from argparse import ArgumentParser
 
 
 FLAGS_SEPARATOR = "#"
@@ -37,57 +38,55 @@ def mark_aliases(arr, targets):
 if __name__ == "__main__":
     match_dict = dict()
     alias_dict = dict()
-
-    THRESHOLD = 2
-    DEBUG = False
-    DESTROY = False
-    KB_PATH = "./KB.tsv"
-    OUTPUT_PATH = "./KB.tsv"
-
-    args = sys.argv[1:]
-    lopts = ["destroy", "debug", "input-file=", "output-file="]
-    optlist, args = getopt.getopt(args, "hdt:", lopts)
     ROOTDIR = os.path.dirname(os.path.realpath(__file__))
 
-    for option, value in optlist:
-        if option == "-h":
-            print("./filter_alias [options]")
-            print("\t-h\t- Shows help")
-            print(
-                f"\t-t\t- Expects you to provide new THRESHOLD value (implicitly {THRESHOLD})"
-            )
-            print("\t--destroy\t- Destructable mode")
-            print("\t--debug\t- Debug mode")
-            print(
-                f"\t--input-file\t- Expects you to provide path to input KB (implicitly {KB_PATH})"
-            )
-            print(
-                f"\t--output-file\t- Expects you to provide path to output KB (implicitly {OUTPUT_PATH})"
-            )
-            exit()
-        elif option == "--debug":
-            DEBUG = True
-        elif option == "--destroy":
-            DESTROY = True
-        elif option == "-t":
-            THRESHOLD = int(value)
-        elif option == "--input-file":
-            KB_PATH = value
-        elif option == "--output-file":
-            OUTPUT_PATH = value
-        else:
-            assert False
+    parser = ArgumentParser(
+        "filter_alias is a script that filters problematic aliases from the KB"
+    )
+    parser.add_argument(
+        "--destroy",
+        help="destructable mode, the aliases in input file will be erased, if"
+             "there the output file is set, then this option will be ignored",
+        action="store_true",
+    )
+    parser.add_argument(
+        "--debug",
+        help="debug mode, diagnostics files will be created",
+        action="store_true",
+    )
+    parser.add_argument(
+        "-i",
+        "--input-file",
+        help="path to the input knowledge base",
+        type=str,
+        default='./KB.tsv',
+    )
+    parser.add_argument(
+        "-o",
+        "--output-file",
+        help="path to the output file",
+        type=str,
+        default='./KB.tsv',
+    )
+    parser.add_argument(
+        "-t",
+        "--threshold",
+        help="how many alias occurances are needed to mark alias as problematic",
+        type=int,
+        default=2,
+    )
+    args = vars(parser.parse_args())
 
-    match_alias.find_problematic_aliases(KB_PATH, alias_dict)
+    match_alias.find_problematic_aliases(args['output_file'], alias_dict)
 
     aliases = set(alias_dict.keys())
     aliases_to_remove = match_alias.find_odd_aliases(aliases)
     aliases.symmetric_difference_update(aliases_to_remove)
 
-    match_alias.match_aliases(KB_PATH, aliases, alias_dict, match_dict)
-    match_alias.remove_useless_matches(alias_dict, match_dict, THRESHOLD)
+    match_alias.match_aliases(args['output_file'], aliases, alias_dict, match_dict)
+    match_alias.remove_useless_matches(alias_dict, match_dict, args['threshold'])
 
-    if DEBUG == True:
+    if args["debug"] == True:
         match_alias.write_numbered_aliases("num_aliases.tsv", alias_dict)
         match_alias.write_matches("aliases_match.tsv", match_dict)
         match_alias.write_aliases("aliases.txt", alias_dict)
@@ -105,6 +104,7 @@ if __name__ == "__main__":
                     + gender
                     + "\n"
                 )
+                print(name, gender)
 
     print("[*] Starting namegen and generating names")
     FNULL = open(os.devnull, "w")
@@ -130,10 +130,10 @@ if __name__ == "__main__":
 
     targets.intersection_update(given_names)
 
-    with open(KB_PATH, "r") as KB:
+    with open(args["input_file"], "r") as KB:
         KB_lines = KB.readlines()
 
-    KB = open(OUTPUT_PATH, "w")
+    KB = open(args["output_file"], "w")
 
     _, _, toc_kb_tools_versions, _, toc_kb_data = kb.get_kb_toc(kb_content=KB_lines)
     if toc_kb_tools_versions:
@@ -152,7 +152,7 @@ if __name__ == "__main__":
         line = KB_lines[num]
         line = line.split("\t")
         aliases = line[POS_ALIAS].split("|")
-        if DESTROY == True:
+        if args["destroy"] == True:
             aliases = filter(
                 lambda name: not (name.split(FLAGS_SEPARATOR)[0] in targets), aliases
             )
