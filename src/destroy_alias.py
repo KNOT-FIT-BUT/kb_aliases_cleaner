@@ -37,6 +37,9 @@ def get_items(filename, column, separator="\t", target_dict=None):
 
 
 if __name__ == "__main__":
+    """ This main entrypoint shows example usage of this module, to get
+    data from file/dictionary and how to filter them from the KB"""
+
     targets = get_items("num_aliases.tsv", TARGETS)
     given_names = get_items("namegen_gn_output.txt", GN_NAMES, "\n")
 
