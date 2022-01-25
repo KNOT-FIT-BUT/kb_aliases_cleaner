@@ -58,7 +58,7 @@ class MARule(collections.Mapping):
 
         !!! V případě více hodnotových morfologických kategorií se považují kategorie u daných pravidel za stejné
         majíly neprázdný průnik nebo jsou obě prázdné.
-
+        
         :param other: Pravidlo pro porovnání.
         :type other: MARule
         :param exceptCat: Kategorie, které nejsou zohledňovány při kontrole na shodu.
@@ -72,13 +72,10 @@ class MARule(collections.Mapping):
                 if morphCat not in exceptCat:
                     # kontrolujeme jen ty kategorie, které chceme
 
-                    if isinstance(other[morphCat], frozenset) and isinstance(
-                        morphCatVal, frozenset
-                    ):
+                    if isinstance(other[morphCat], frozenset) and isinstance(morphCatVal, frozenset):
                         # více hodnotové atributy
                         if (len(morphCatVal) > 0 or len(other[morphCat]) > 0) and len(
-                            morphCatVal & other[morphCat]
-                        ) == 0:
+                                morphCatVal & other[morphCat]) == 0:
                             # Kategorie mají prázdný průnik a nejsou obě prázdné.
                             return False
                     else:
@@ -92,16 +89,12 @@ class MARule(collections.Mapping):
 
         return True
 
-    def fitsToFilters(
-        self,
-        valFilter: Set[MorphCategory] = None,
-        notValFilter: Set[MorphCategory] = None,
-        valFilterUsedCategories: Set[MorphCategories] = None,
-    ):
+    def fitsToFilters(self, valFilter: Set[MorphCategory] = None,
+                      notValFilter: Set[MorphCategory] = None, valFilterUsedCategories: Set[MorphCategories] = None):
         """
         Detekce zdali pravidlo padne na poskytnuté filtry
-
-        :param valFilter: (Volitelný) Filtr, který určuje pevně stanovené
+        
+        :param valFilter: (Volitelný) Filtr, který určuje pevně stanovené 
                 hodnoty, které musí mít pravidlo, aby se vrátilo True.
                 Tedy není-li v daném pravidle vůbec zminěná kategorie obsažena, tak pravidlo neprojde přes filtr.
         :type valFilter: Set[MorphCategory]
@@ -125,9 +118,7 @@ class MARule(collections.Mapping):
             # Kategorie pravidla může obsahovat přímo hodnotu nebo množinu hodnot.
             # Musíme se tedy rozhodnout zdali budeme danou kategorii pravidla zpracovávat jako množinu nebo hodnotu,
 
-            if all(
-                self._categoryValFilter(c, valFilter) for c in valFilterUsedCategories
-            ):
+            if all(self._categoryValFilter(c, valFilter) for c in valFilterUsedCategories):
                 # Máme splněny všechny valFilter podmínky.
 
                 # Ted se mrkneme na notValFilter podmínky.
@@ -148,9 +139,7 @@ class MARule(collections.Mapping):
 
         return False
 
-    def _categoryValFilter(
-        self, category: MorphCategories, valFilter: Set[MorphCategory]
-    ):
+    def _categoryValFilter(self, category: MorphCategories, valFilter: Set[MorphCategory]):
         """
         Zjistí zdali daná kategorie v pravidle obsahuje pouze hodnoty z valFilter.
 
@@ -191,51 +180,39 @@ class MARule(collections.Mapping):
             # pořadí pro ify je voleno dle předpokládané četnosti
             if self[MorphCategories.POS] == POS.NOUN:
                 # podstané jméno zjistím rod, číslo, pád
-                pos += (
-                    self[MorphCategories.GENDER].lntrf
-                    + self[MorphCategories.NUMBER].lntrf
-                    + self[MorphCategories.CASE].lntrf
-                )
+                pos += self[MorphCategories.GENDER].lntrf \
+                       + self[MorphCategories.NUMBER].lntrf \
+                       + self[MorphCategories.CASE].lntrf
 
             elif self[MorphCategories.POS] == POS.ADJECTIVE:
                 # přídavné jméno zjistím negaci,rod, číslo, pád, stupeň
-                pos += (
-                    self[MorphCategories.NEGATION].lntrf
-                    + self[MorphCategories.GENDER].lntrf
-                    + self[MorphCategories.NUMBER].lntrf
-                    + self[MorphCategories.CASE].lntrf
-                    + self[MorphCategories.DEGREE_OF_COMPARISON].lntrf
-                )
+                pos += self[MorphCategories.NEGATION].lntrf \
+                       + self[MorphCategories.GENDER].lntrf \
+                       + self[MorphCategories.NUMBER].lntrf \
+                       + self[MorphCategories.CASE].lntrf \
+                       + self[MorphCategories.DEGREE_OF_COMPARISON].lntrf
             elif self[MorphCategories.POS] == POS.NUMERAL:
                 # číslovka rod, číslo, pád
-                pos += (
-                    self[MorphCategories.GENDER].lntrf
-                    + self[MorphCategories.NUMBER].lntrf
-                    + self[MorphCategories.CASE].lntrf
-                )
+                pos += self[MorphCategories.GENDER].lntrf \
+                       + self[MorphCategories.NUMBER].lntrf \
+                       + self[MorphCategories.CASE].lntrf
 
             elif self[MorphCategories.POS] == POS.PRONOUN:
                 # zájméno zjistime rod, číslo, pád
-                pos += (
-                    self[MorphCategories.GENDER].lntrf
-                    + self[MorphCategories.NUMBER].lntrf
-                    + self[MorphCategories.CASE].lntrf
-                )
+                pos += self[MorphCategories.GENDER].lntrf \
+                       + self[MorphCategories.NUMBER].lntrf \
+                       + self[MorphCategories.CASE].lntrf
 
             elif self[MorphCategories.POS] == POS.VERB:
                 # sloveso negace, osoba, číslo
-                pos += (
-                    self[MorphCategories.NEGATION].lntrf
-                    + self[MorphCategories.PERSON].lntrf
-                    + self[MorphCategories.NUMBER].lntrf
-                )
+                pos += self[MorphCategories.NEGATION].lntrf \
+                       + self[MorphCategories.PERSON].lntrf \
+                       + self[MorphCategories.NUMBER].lntrf
 
             elif self[MorphCategories.POS] == POS.ADVERB:
                 # příslovce negace stupeň
-                pos += (
-                    self[MorphCategories.NEGATION].lntrf
-                    + self[MorphCategories.DEGREE_OF_COMPARISON].lntrf
-                )
+                pos += self[MorphCategories.NEGATION].lntrf \
+                       + self[MorphCategories.DEGREE_OF_COMPARISON].lntrf
 
             """ PRO PŘÍPADNÉ BUDOUCÍ UŽITÍ
 
@@ -268,17 +245,9 @@ class MARule(collections.Mapping):
             # zkusíme tedy co všechno má
             res = ""
 
-            for x in [
-                MorphCategories.POS,
-                MorphCategories.NEGATION,
-                MorphCategories.GENDER,
-                MorphCategories.PERSON,
-                MorphCategories.NUMBER,
-                MorphCategories.CASE,
-                MorphCategories.NEGATION,
-                MorphCategories.DEGREE_OF_COMPARISON,
-                MorphCategories.STYLISTIC_FLAG,
-            ]:
+            for x in [MorphCategories.POS, MorphCategories.NEGATION, MorphCategories.GENDER, MorphCategories.PERSON,
+                      MorphCategories.NUMBER, MorphCategories.CASE, MorphCategories.NEGATION,
+                      MorphCategories.DEGREE_OF_COMPARISON, MorphCategories.STYLISTIC_FLAG]:
                 try:
                     res += self[x].lntrf
                 except KeyError:
@@ -294,16 +263,12 @@ class MorphoAnalyze(ABC):
     """
 
     @abstractmethod
-    def getAll(
-        self,
-        valFilter: Set[MorphCategory] = None,
-        notValFilter: Set[MorphCategory] = None,
-        groupFlags: Set[Flag] = None,
-    ) -> Dict[MorphCategories, Set[MorphCategory]]:
+    def getAll(self, valFilter: Set[MorphCategory] = None, notValFilter: Set[MorphCategory] = None,
+               groupFlags: Set[Flag] = None) -> Dict[MorphCategories, Set[MorphCategory]]:
         """
         Vrácení všech možných hodnot mluvnických kategorií.
-
-        :param valFilter: (Volitelný) Filtr, který určuje pevně stanovené
+        
+        :param valFilter: (Volitelný) Filtr, který určuje pevně stanovené 
             hodnoty, které musí mít dané pravidlo, aby se bralo v úvahu.
             Tedy není-li v daném pravidle vůbec zmíněná kategorie obsažena, tak pravidlo neprojde přes filtr.
             Příklad: Chci získat všechny rody jakých může nabývat slovo pokud je podstatným jménem.
@@ -320,19 +285,14 @@ class MorphoAnalyze(ABC):
         pass
 
     @abstractmethod
-    def getAllForCategory(
-        self,
-        morphCategory: MorphCategories,
-        valFilter: Set[MorphCategory] = None,
-        notValFilter: Set[MorphCategory] = None,
-        groupFlags: Set[Flag] = None,
-    ) -> Set[MorphCategory]:
+    def getAllForCategory(self, morphCategory: MorphCategories, valFilter: Set[MorphCategory] = None,
+                          notValFilter: Set[MorphCategory] = None, groupFlags: Set[Flag] = None) -> Set[MorphCategory]:
         """
         Vrácení všech možných hodnot dané mluvnické kategorie.
-
+        
         :param morphCategory: Mluvnická kategorie.
         :type morphCategory: MorphCategories
-        :param valFilter: (Volitelný) Filter, který určuje pevně stanovené
+        :param valFilter: (Volitelný) Filter, který určuje pevně stanovené 
             hodnoty, které musí mít dané pravidlo, aby se bralo v úvahu.
             Tedy není-li v daném pravidle/rozboru vůbec zminěná kategorie obsažena, tak pravidlo neprojde přes filtr.
             Příklad: Chci získat všechny rody jakých může nabývat slovo pokud je podstatným jménem.
@@ -349,17 +309,12 @@ class MorphoAnalyze(ABC):
         pass
 
     @abstractmethod
-    def getMorphs(
-        self,
-        valFilter: Set[MorphCategory] = None,
-        notValFilter: Set[MorphCategory] = None,
-        wordFilter: Set[MorphCategory] = None,
-        groupFlags: Set[Flag] = None,
-    ) -> Set[Tuple[MARule, str]]:
+    def getMorphs(self, valFilter: Set[MorphCategory] = None, notValFilter: Set[MorphCategory] = None,
+                  wordFilter: Set[MorphCategory] = None, groupFlags: Set[Flag] = None) -> Set[Tuple[MARule, str]]:
         """
         Získání tvarů.
-
-        :param valFilter: (Volitelný) Filtr, který určuje pevně stanovené
+        
+        :param valFilter: (Volitelný) Filtr, který určuje pevně stanovené 
                 hodnoty, které musí mít pravidlo tvaru, aby se bral v úvahu daný tvar.
                 Tedy není-li v daném pravidle tvaru vůbec zminěná kategorie obsažena, tak tvar neprojde přes filtr.
                 Příklad: Chci získat všechny tvary, které jsou podstatným jménem, tak
@@ -389,7 +344,7 @@ class MorphoAnalyzer(ABC):
     """
 
     @abstractmethod
-    def isNameDependant(self, word: str, name=None) -> bool:
+    def isNameDependant(self, word: str, name) -> bool:
         """
         Zjistí zdali daná kombinace slova a jména má na jméně závislou analýzu.
 
@@ -404,9 +359,7 @@ class MorphoAnalyzer(ABC):
         pass
 
     @abstractmethod
-    def analyze(
-        self, word: str, name=None, wordPos: Optional[int] = None
-    ) -> MorphoAnalyze:
+    def analyze(self, word: str, name=None, wordPos: Optional[int]=None) -> MorphoAnalyze:
         """
         Získání morfologické analýzy slova.
 
@@ -439,36 +392,24 @@ class EQRelationForPrepAndItsAbbre(object):
 
     def __eq__(self, other):
         if isinstance(other, self.__class__):
-            if (
-                len(self.name) == len(other.name)
-                and self.name[0] == other.name[0]
-                and self.name[-1] == other.name[-1]
-            ):
+            if len(self.name) == len(other.name) and self.name[0] == other.name[0] and \
+                    self.name[-1] == other.name[-1]:
                 # Jména jsou stejně dlouhé mají stejná první a poslední slova,
                 # ted se pojďme podívat ještě na korespondence typu:
                 # Bernstadt auf dem Eigen <->  Bernstadt a. d. Eigen
 
                 # prohledáváme prostřední slova
                 constraintAllCor = True  # všechny prostřední slova musí koresponovat
-                constraintAtLeastOneAbber = (
-                    False  # je mezi nimi alespoň jedno slovo připomínající zkratku.
-                )
+                constraintAtLeastOneAbber = False  # je mezi nimi alespoň jedno slovo připomínající zkratku.
                 for wI in range(1, len(self.name) - 1):
                     if self.name[wI][0] == other.name[wI][0]:
 
                         # máme shodu na první písmeno
-                        if (
-                            len(self.name[wI]) == 2
-                            and self.name[wI][-1] == "."
-                            and self.name[wI][-2].islower()
-                        ):
+                        if len(self.name[wI]) == 2 and self.name[wI][-1] == "." and self.name[wI][-2].islower():
                             # actName je zkratka korespondující s curCheckingName
                             constraintAtLeastOneAbber = True
-                        elif (
-                            len(other.name[wI]) == 2
-                            and other.name[wI][-1] == "."
-                            and other.name[wI][-2].islower()
-                        ):
+                        elif len(other.name[wI]) == 2 and \
+                                other.name[wI][-1] == "." and other.name[wI][-2].islower():
                             # curCheckingName je zkratka korespondující s actName
                             constraintAtLeastOneAbber = True
                         elif self.name[wI] != other.name[wI]:
@@ -493,7 +434,6 @@ class MorphoAnalyzerException(ExceptionMessageCode):
     """
     Vyjímka pro problémy s morfologickým analyzátorem
     """
-
     pass
 
 
@@ -550,9 +490,7 @@ class MorphoAnalyzerLibma(MorphoAnalyzer):
             :type word: str
             """
             self._word = word
-            self._flags = {
-                Flag.NOT_GENERAL_WORD
-            }  # implicitně se nejedná o obecné slovo
+            self._flags = {Flag.NOT_GENERAL_WORD}  # implicitně se nejedná o obecné slovo
             self._tagRules = []  # značko pravidla pro slovo
             self._morphs = []  # tvary k danému slovu ve formátu dvojic (tagRule, tvar)
 
@@ -625,10 +563,8 @@ class MorphoAnalyzerLibma(MorphoAnalyzer):
 
             rule = self.convTagRule(tagRule)
 
-            if (
-                MorphCategories.STYLISTIC_FLAG in rule
-                and rule[MorphCategories.STYLISTIC_FLAG] == StylisticFlag.COLLOQUIALLY
-            ):
+            if MorphCategories.STYLISTIC_FLAG in rule and \
+                    rule[MorphCategories.STYLISTIC_FLAG] == StylisticFlag.COLLOQUIALLY:
                 # nechceme hovorové
                 return
 
@@ -637,19 +573,14 @@ class MorphoAnalyzerLibma(MorphoAnalyzer):
                 if relevant:
                     # uživatel chce přidat jen relevantní
                     for r in self._tagRules:
-                        if r.sameExcept(
-                            rule, {MorphCategories.CASE, MorphCategories.STYLISTIC_FLAG}
-                        ):
+                        if r.sameExcept(rule, {MorphCategories.CASE, MorphCategories.STYLISTIC_FLAG}):
                             # je stejné jako alespoň jedno pravidlo
                             self._morphs.append((rule, morph))
                 else:
                     self._morphs.append((rule, morph))
 
-        def getMorphs(
-            self,
-            valFilter: Set[MorphCategory] = None,
-            notValFilter: Set[MorphCategory] = None,
-        ) -> Set[Tuple[MARule, str]]:
+        def getMorphs(self, valFilter: Set[MorphCategory] = None, notValFilter: Set[MorphCategory] = None) \
+                -> Set[Tuple[MARule, str]]:
             """
             Získání tvarů.
 
@@ -709,14 +640,15 @@ class MorphoAnalyzerLibma(MorphoAnalyzer):
             # !!! Pro kategorie s více hodnotami se používá frozenset. Dále v kodu se s tím počítá. !!!
             res = dict()
             notes = None
-            rule = tagRule.split(
-                MorphCategories.NOTE.lntrf
-            )  # dělíme řetězec dle značky poznámky
+            rule = tagRule.split(MorphCategories.NOTE.lntrf)  # dělíme řetězec dle značky poznámky
 
             if len(rule) > 1:
                 # Pravidlo obsahuje alespoň jednu poznámku.
 
-                notes = rule[1:]
+                notes = []
+                for n in rule[1:]:
+                    for chunkOffset in range(0, len(n), 2):
+                        notes.append(n[chunkOffset:chunkOffset+2])
 
             rule = rule[0]
 
@@ -724,10 +656,7 @@ class MorphoAnalyzerLibma(MorphoAnalyzer):
                 try:
                     mCategory = MorphCategories.fromLntrf(rule[i])
                     res[mCategory] = mCategory.createCategoryFromLntrf(rule[i + 1])
-                except (
-                    MorphCategoryInvalidException,
-                    MorphCategoryInvalidValueException,
-                ):
+                except (MorphCategoryInvalidException, MorphCategoryInvalidValueException):
                     # neznámá kategorie, či hodnota kategorie
                     # pravděpodobně se jedná o kategorii, která nás nezajíma
                     # tak to vynecháme
@@ -783,11 +712,8 @@ class MorphoAnalyzerLibma(MorphoAnalyzer):
             if r:
                 self.addTagRuleConv(r)
 
-        def getAll(
-            self,
-            valFilter: Set[MorphCategory] = None,
-            notValFilter: Set[MorphCategory] = None,
-        ) -> Dict[MorphCategories, Set[MorphCategory]]:
+        def getAll(self, valFilter: Set[MorphCategory] = None, notValFilter: Set[MorphCategory] = None) \
+                -> Dict[MorphCategories, Set[MorphCategory]]:
             """
             Vrácení všech možných hodnot mluvnických kategorií.
 
@@ -836,12 +762,8 @@ class MorphoAnalyzerLibma(MorphoAnalyzer):
 
             return values
 
-        def getAllForCategory(
-            self,
-            morphCategory: MorphCategories,
-            valFilter: Set[MorphCategory] = None,
-            notValFilter: Set[MorphCategory] = None,
-        ) -> Set[MorphCategory]:
+        def getAllForCategory(self, morphCategory: MorphCategories, valFilter: Set[MorphCategory] = None,
+                              notValFilter: Set[MorphCategory] = None) -> Set[MorphCategory]:
             """
             Vrácení všech možných hodnot mluvnické kategorie.
 
@@ -936,12 +858,8 @@ class MorphoAnalyzerLibma(MorphoAnalyzer):
 
             self._groups.remove(group)
 
-        def getAll(
-            self,
-            valFilter: Set[MorphCategory] = None,
-            notValFilter: Set[MorphCategory] = None,
-            groupFlags: Set[Flag] = None,
-        ) -> Dict[MorphCategories, Set[MorphCategory]]:
+        def getAll(self, valFilter: Set[MorphCategory] = None, notValFilter: Set[MorphCategory] = None,
+                   groupFlags: Set[Flag] = None) -> Dict[MorphCategories, Set[MorphCategory]]:
             """
             Vrácení všech možných hodnot mluvnických kategorií. Ve všech skupinách
             získaných při analýze slova.
@@ -972,9 +890,7 @@ class MorphoAnalyzerLibma(MorphoAnalyzer):
                 if len(g.flags & groupFlags) == len(groupFlags):
                     # má všechny flagy
 
-                    for morphCat, morphCatValues in g.getAll(
-                        valFilter, notValFilter
-                    ).items():
+                    for morphCat, morphCatValues in g.getAll(valFilter, notValFilter).items():
                         try:
                             values[morphCat] = values[morphCat] | morphCatValues
                         except KeyError:
@@ -983,13 +899,9 @@ class MorphoAnalyzerLibma(MorphoAnalyzer):
 
             return values
 
-        def getAllForCategory(
-            self,
-            morphCategory: MorphCategories,
-            valFilter: Set[MorphCategory] = None,
-            notValFilter: Set[MorphCategory] = None,
-            groupFlags: Set[Flag] = None,
-        ) -> Set[MorphCategory]:
+        def getAllForCategory(self, morphCategory: MorphCategories, valFilter: Set[MorphCategory] = None,
+                              notValFilter: Set[MorphCategory] = None, groupFlags: Set[Flag] = None) \
+                -> Set[MorphCategory]:
             """
             Vrácení všech možných hodnot dané mluvnické kategorie. Ve všech skupinách
             získaných při analýze slova.
@@ -1022,19 +934,12 @@ class MorphoAnalyzerLibma(MorphoAnalyzer):
             for g in self._groups:
                 if len(g.flags & groupFlags) == len(groupFlags):
                     # má všechny flagy
-                    values |= g.getAllForCategory(
-                        morphCategory, valFilter, notValFilter
-                    )
+                    values |= g.getAllForCategory(morphCategory, valFilter, notValFilter)
 
             return values
 
-        def getMorphs(
-            self,
-            valFilter: Set[MorphCategory] = None,
-            notValFilter: Set[MorphCategory] = None,
-            wordFilter: Set[MorphCategory] = None,
-            groupFlags: Set[Flag] = None,
-        ) -> Set[Tuple[MARule, str]]:
+        def getMorphs(self, valFilter: Set[MorphCategory] = None, notValFilter: Set[MorphCategory] = None,
+                      wordFilter: Set[MorphCategory] = None, groupFlags: Set[Flag] = None) -> Set[Tuple[MARule, str]]:
             """
             Získání tvarů.
 
@@ -1124,11 +1029,7 @@ class MorphoAnalyzerLibma(MorphoAnalyzer):
                     self._prepAbberEqClasses[EQRelationForPrepAndItsAbbre(n)] = {n}
 
         # odfiltrujeme všechny třídy s méně jak 2 položkami
-        self._prepAbberEqClasses = {
-            eqR: names
-            for eqR, names in self._prepAbberEqClasses.items()
-            if len(names) > 1
-        }
+        self._prepAbberEqClasses = {eqR: names for eqR, names in self._prepAbberEqClasses.items() if len(names) > 1}
 
     def __init__(self, pathToMa, words, hint=None):
         """
@@ -1180,9 +1081,7 @@ class MorphoAnalyzerLibma(MorphoAnalyzer):
                 g.addMorph(POS.ABBREVIATION.lntrf, w)
                 try:
                     wordAnalyze = self._wordDatabase[w]
-                    if POS.ABBREVIATION not in wordAnalyze.getAllForCategory(
-                        MorphCategories.POS
-                    ):
+                    if POS.ABBREVIATION not in wordAnalyze.getAllForCategory(MorphCategories.POS):
                         # Zatím není možnou zkratkou, tak přidáme.
                         wordAnalyze.addGroup(g)
                 except KeyError:
@@ -1192,28 +1091,9 @@ class MorphoAnalyzerLibma(MorphoAnalyzer):
 
         # přidáme ke slovům von, da a de
         # analýzu, že se jedná o předložky za nimiž se slova ohýbají
-        for prep in [
-            "dalla",
-            "de",
-            "da",
-            "del",
-            "di",
-            "dos",
-            "el",
-            "la",
-            "le",
-            "van",
-            "von",
-            "O’",
-            "ben",
-            "bin",
-            "y",
-            "zu",
-        ]:
-            for w in [
-                prep,
-                prep.capitalize(),
-            ]:  # generujeme variantu s velkým a malým písmenem na začátku
+        for prep in ["dalla", "de", "der", "da", "del", "di", "dos", "el", "la", "le", "van", "von", "und", "ben",
+                     "bin", "y", "zu"]:
+            for w in [prep, prep.capitalize()]:  # generujeme variantu s velkým a malým písmenem na začátku
                 g = self.MAWordGroup(w)
                 g.lemma = w
 
@@ -1230,11 +1110,7 @@ class MorphoAnalyzerLibma(MorphoAnalyzer):
         try:
             ma = self._wordDatabase["a"]
 
-            delGroups = [
-                group
-                for group in ma.groups
-                if group.rules[0][MorphCategories.POS] != POS.CONJUNCTION
-            ]
+            delGroups = [group for group in ma.groups if group.rules[0][MorphCategories.POS] != POS.CONJUNCTION]
 
             for g in delGroups:
                 ma.delGroup(g)
@@ -1263,13 +1139,9 @@ class MorphoAnalyzerLibma(MorphoAnalyzer):
         :raise MorphoAnalyzerException: Chyba analyzátoru.
         """
 
-        p = Popen(
-            [self._pathToMa, "-F", "-m", "-n"], stdin=PIPE, stdout=PIPE, stderr=None
-        )
+        p = Popen([self._pathToMa, "-F", "-m", "-n"], stdin=PIPE, stdout=PIPE, stderr=None)
 
-        output, _ = p.communicate(
-            str.encode(("\n".join(words)) + "\n")
-        )  # vrací stdout a stderr
+        output, _ = p.communicate(str.encode(("\n".join(words)) + "\n"))  # vrací stdout a stderr
 
         # zkontrolujeme návratový kód
         if p.returncode != 0:
@@ -1291,19 +1163,11 @@ class MorphoAnalyzerLibma(MorphoAnalyzer):
             words = words[retWords:]  # zbavíme se již zpracovaných
 
             partSize = math.ceil(len(words) / 2)
-            logging.info(
-                "\tPři komunikaci s ma došlo ke ztrátě slov (odesláno: "
-                + str(origCnt)
-                + ", přijato: "
-                + str(retWords)
-                + "). Pokusím se o komunikaci znovu s menším počtem slov: "
-                + str(origCnt)
-                + " -> "
-                + str(partSize)
-                + "."
-            )
+            logging.info("\tPři komunikaci s ma došlo ke ztrátě slov (odesláno: " + str(origCnt) + ", přijato: " + str(
+                retWords) + "). Pokusím se o komunikaci znovu s menším počtem slov: " +
+                         str(origCnt) + " -> " + str(partSize) + ".")
             for offset in range(0, len(words), partSize):
-                self.__commWithMA(words[offset : offset + partSize])
+                self.__commWithMA(words[offset:offset + partSize])
 
     def _parseMaOutput(self, output):
         """
@@ -1357,15 +1221,8 @@ class MorphoAnalyzerLibma(MorphoAnalyzer):
                         # aplikujeme nápovědu
                         convRule = self.MAWordGroup.convTagRule(parts[0][3:])
 
-                        hint = (
-                            self._hint[actWordGroup.word]
-                            if isinstance(self._hint, dict)
-                            else self._hint
-                        )
-                        if all(
-                            f.category() not in convRule or convRule[f.category()] == f
-                            for f in hint
-                        ):
+                        hint = self._hint[actWordGroup.word] if isinstance(self._hint, dict) else self._hint
+                        if all(f.category() not in convRule or convRule[f.category()] == f for f in hint):
                             actWordGroup.addTagRuleConv(convRule)
                     else:
                         actWordGroup.addTagRule(parts[0][3:])
@@ -1387,14 +1244,9 @@ class MorphoAnalyzerLibma(MorphoAnalyzer):
                     actWordGroup.addMorph((parts[0][3:])[1:-1], parts[1], True)
 
             except IndexError:
-                raise MorphoAnalyzerException(
-                    ErrorMessenger.CODE_MA_CAN_NOT_READ_OUTPUT,
-                    ErrorMessenger.getMessage(
-                        ErrorMessenger.CODE_MA_CAN_NOT_READ_OUTPUT
-                    ).format(lineNumber)
-                    + "\n\t"
-                    + line,
-                )
+                raise MorphoAnalyzerException(ErrorMessenger.CODE_MA_CAN_NOT_READ_OUTPUT,
+                                              ErrorMessenger.getMessage(ErrorMessenger.CODE_MA_CAN_NOT_READ_OUTPUT)
+                                              .format(lineNumber) + "\n\t" + line)
 
         # byla předešlá skupina k něčemu dobrá?
         if actWordGroup is not None and len(actWordGroup.rules) == 0:
@@ -1416,13 +1268,8 @@ class MorphoAnalyzerLibma(MorphoAnalyzer):
         :rtype: bool
         """
 
-        return EQRelationForPrepAndItsAbbre(
-            name
-        ) in self._prepAbberEqClasses and POS.ABBREVIATION in self._wordDatabase[
-            word
-        ].getAllForCategory(
-            MorphCategories.POS
-        )
+        return EQRelationForPrepAndItsAbbre(name) in self._prepAbberEqClasses and \
+            POS.ABBREVIATION in self._wordDatabase[word].getAllForCategory(MorphCategories.POS)
 
     def analyze(self, word, name=None, wordPos: Optional[int] = None):
         """
@@ -1449,25 +1296,16 @@ class MorphoAnalyzerLibma(MorphoAnalyzer):
         if name is not None:
             eqR = EQRelationForPrepAndItsAbbre(name)
 
-            if (
-                eqR in self._prepAbberEqClasses
-                and POS.ABBREVIATION
-                in self._wordDatabase[word].getAllForCategory(MorphCategories.POS)
-            ):
+            if eqR in self._prepAbberEqClasses and \
+                    POS.ABBREVIATION in self._wordDatabase[word].getAllForCategory(MorphCategories.POS):
                 # Máme na jménu závislou analýzu pro toto slovo.
 
                 # Budeme zkoušet zdali neexistuje prvek v ekv. třídě,
                 # který má slovo na stejné pozici a je předložkou.
 
-                if wordPos is not None and any(
-                    (
-                        POS.PREPOSITION
-                        in self._wordDatabase[str(n[wordPos])].getAllForCategory(
-                            MorphCategories.POS
-                        )
-                    )
-                    for n in self._prepAbberEqClasses[eqR]
-                ):
+                if wordPos is not None and \
+                        any((POS.PREPOSITION in self._wordDatabase[str(n[wordPos])].getAllForCategory(MorphCategories.POS))
+                            for n in self._prepAbberEqClasses[eqR]):
                     # Vytvoříme se prázdnou novou analýzu slova, protože jsme si na základě získaného kontextu
                     # jistější o tom, že je to zkratka předložky a jiné možnosti tedy zamítneme.
                     wordAnalyze = self.MAWord()

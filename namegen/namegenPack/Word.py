@@ -7,11 +7,7 @@ Modul pro práci se slovem.
 """
 from enum import Enum
 from namegenPack import Errors
-from namegenPack.morpho.MorphoAnalyzer import (
-    MorphoAnalyzer,
-    MorphoAnalyze,
-    MorphCategory,
-)
+from namegenPack.morpho.MorphoAnalyzer import MorphoAnalyzer, MorphoAnalyze, MorphCategory
 from namegenPack.morpho.MorphCategories import StylisticFlag, Flag
 from typing import Set
 
@@ -20,19 +16,26 @@ class WordTypeMark(Enum):
     """
     Značka druhu slova ve jméně. Vyskytuje se jako atribut v gramatice.
     """
-
-    GIVEN_NAME = "G"  # Křestní jméno. Příklad: Petra
-    SURNAME = "S"  # Příjmení. Příklad: Novák
-    LOCATION = "L"  # Lokace. Příklad: Brno
+    GIVEN_NAME = "jG"  # Křestní jméno. Příklad: Petra
+    SURNAME = "jS"  # Příjmení. Příklad: Novák
+    LOCATION = "jL"  # Lokace. Příklad: Brno
     EVENT = "E"  # Událost: Příklad: Osvobození Československa
     ROMAN_NUMBER = "R"  # Římská číslice. Příklad: IV
     PREPOSITION = "7"  # Předložka.
     PREPOSITION_ABBREVIATION = "7A"  # Například Nové Město n. Moravě
     CONJUCTION = "8"  # Spojka.
     NUMBER = "4"  # Číslovka. Příklad: 2
-    DEGREE_TITLE = "T"  # Titul. Příklad: prof.
+    DEGREE_TITLE = "jT"  # Titul. Příklad: prof.
     INITIAL_ABBREVIATION = "I"  # Iniciálová zkratka. Příklad H. ve jméně John H. White
     ABBREVIATION = "A"  # Zkratka. Příklad Sv. ve jméně Sv. Nikola
+    GENERATION_SPECIFIER = "GS"  # Generační specifikace. Příklad: mladší
+    MODIFIER = "M" # Přívlastek/epiteton. Příklad: sličný
+    UNIQ_NAME = "jB" # Jedná se o jméno, které je v historii pevně spjato s jednou osobou. Příklad: Aristotelés
+    FEMALE_PATRONYM = "jP" # ženská patronyma - Albertovna, Vasilijevna
+    MALE_PATRONYM = "jQ"  # mužská patronyma - Alexandrovič, Alexejevič
+    ALIAS = "jI"  # pseudonymy lidí, např. Šusťa, Švanci, Švícko
+    HOUSE = "H" # House/Rod Příklad: z Přemyslovců
+    DETERMINER = "D"  # člen/determiner (Příklad: the)
     UNKNOWN = "U"  # Neznámé
 
     def __str__(self):
@@ -52,7 +55,7 @@ class Word(object):
         def __init__(self, word, code, message=None):
             """
             Konstruktor pro vyjímku se zprávou a kódem.
-
+            
             :param word: Pro toto slovo se generuje tato vyjímka
             :type word: Word
             :param code: Kód chyby. Pokud je uveden pouze kód, pak se zpráva automaticky na základě něj doplní.
@@ -66,67 +69,49 @@ class Word(object):
         """
         Vyjímka symbolizující, že se nepovedlo získat mluvnické kategorie ke slovu.
         """
-
         pass
 
     class WordNoMorphsException(WordException):
         """
         Vyjímka symbolizující, že se nepovedlo získat ani jeden tvar slova.
         """
-
         pass
 
-    ma = None
-    """Morfologický analyzátor."""
-
-    def __init__(self, w, name=None, wordPos: int = None):
+    def __init__(self, w, name, wordPos: int):
         """
         Konstruktor slova.
-
+        
         :param w: Řetězcová reprezentace slova.
         :type w: String
         :param name: Jméno ze kterého pochází toto slovo.
-            Pokud je toto jméno předáno, pak se vytvoří na jméně závislé slovo. Tento druh slova se využívá v případech,
-            kdy chceme na jméně zásvilou morfologickou analýzu.
-        :type name: Optional[Name]
+        :type name: Name
         :param wordPos: Pozice slova ve jméně.
-        :type wordPos: Optional[int]
+        :type wordPos: int
         """
         self._w = w
         self.name = name
         self.wordPos = wordPos
 
     @classmethod
-    def createNameDependantWord(cls, w, name=None, wordPos: int = None):
+    def createNameDependantWord(cls, w, name, wordPos: int):
         """
         Vytvoří na jméně závislé slovo, ale jen pokud má na jméně závislou analýzu.
 
         :param w: Řetězcová reprezentace slova.
         :type w: String
         :param name: Jméno ze kterého pochází toto slovo.
-            Pokud je toto jméno předáno, pak se vytvoří na jméně závislé slovo. Tento druh slova se využívá v případech,
+            Vytvoří na jméně závislé slovo. Tento druh slova se využívá v případech,
             kdy chceme na jméně zásvilou morfologickou analýzu.
-        :type name: Optional[Name]
+        :type name: Name
         :param wordPos: Pozice slova ve jméně.
         :type wordPos: int
         :return: Na jméně závislé slovo nebo None.
         :rtype: Union[None, Word]
         """
 
-        if cls.ma.isNameDependant(w, name):
+        if name.language.ma.isNameDependant(w, name):
             return cls(w, name, wordPos)
         return None
-
-    @classmethod
-    def setMorphoAnalyzer(cls, ma: MorphoAnalyzer):
-        """
-        Přiřazení morfologického analyzátoru.
-
-        :param ma: Morfologický analyzátor, který se bude používat k získávání informací o slově.
-        :type ma: MorphoAnalyzer
-        """
-
-        cls.ma = ma
 
     @property
     def info(self) -> MorphoAnalyze:
@@ -137,44 +122,23 @@ class Word(object):
         :rtype: MorphoAnalyze
         :raise WordCouldntGetInfoException: Problém při analýze slova.
         """
-        if self.ma is None:
-            # nemohu provést morfologickou analýzu bez analyzátoru
-            raise self.WordCouldntGetInfoException(
-                self,
-                Errors.ErrorMessenger.CODE_WORD_ANALYZE,
-                Errors.ErrorMessenger.getMessage(
-                    Errors.ErrorMessenger.CODE_WORD_ANALYZE
-                )
-                + "\t"
-                + self._w,
-            )
 
         # získání analýzy
-        a = self.ma.analyze(self._w, self.name, self.wordPos)
+        a = self.name.language.ma.analyze(self._w, self.name, self.wordPos)
         if a is None:
-            raise self.WordCouldntGetInfoException(
-                self,
-                Errors.ErrorMessenger.CODE_WORD_ANALYZE,
-                Errors.ErrorMessenger.getMessage(
-                    Errors.ErrorMessenger.CODE_WORD_ANALYZE
-                )
-                + "\t"
-                + self._w,
-            )
+            raise self.WordCouldntGetInfoException(self, Errors.ErrorMessenger.CODE_WORD_ANALYZE,
+                                                   Errors.ErrorMessenger.getMessage(
+                                                       Errors.ErrorMessenger.CODE_WORD_ANALYZE) + "\t" + self._w)
 
         return a
 
-    def morphs(
-        self,
-        categories: Set[MorphCategory],
-        wordFilter: Set[MorphCategory] = None,
-        groupFlags: Set[Flag] = None,
-    ):
+    def morphs(self, categories: Set[MorphCategory], wordFilter: Set[MorphCategory] = None,
+               groupFlags: Set[Flag] = None):
         """
         Vygeneruje tvary slova s ohledem na poskytnuté kategorie. Vybere jen tvary jenž odpovídají daným kategoriím.
         Příklad: V atributu categories jsou: podstatné jméno, rodu mužský, jednotné číslo
             Potom vygeneruje tvary, které jsou: podstatné jméno rodu mužského v jednotném čísle.
-
+        
         :param categories: Kategorie, které musí mít generované tvary.
         :type categories: Set[MorphCategory]
         :param wordFilter: Podmínky na původní slovo. Jelikož analýza nám může říci několik variant, tak tímto filtrem můžeme
@@ -199,38 +163,23 @@ class Word(object):
         if groupFlags is None:
             groupFlags = set()
 
-        tmp = self.info.getMorphs(
-            categories, {StylisticFlag.COLLOQUIALLY}, wordFilter, groupFlags
-        )
+        tmp = self.info.getMorphs(categories, {StylisticFlag.COLLOQUIALLY}, wordFilter, groupFlags)
         if tmp is None or len(tmp) < 1:
-            raise self.WordNoMorphsException(
-                self,
-                Errors.ErrorMessenger.CODE_WORD_NO_MORPHS_GENERATED,
-                Errors.ErrorMessenger.getMessage(
-                    Errors.ErrorMessenger.CODE_WORD_NO_MORPHS_GENERATED
-                )
-                + "\t"
-                + self._w,
-            )
+            raise self.WordNoMorphsException(self, Errors.ErrorMessenger.CODE_WORD_NO_MORPHS_GENERATED,
+                                             Errors.ErrorMessenger.getMessage(
+                                                 Errors.ErrorMessenger.CODE_WORD_NO_MORPHS_GENERATED) + "\t" + self._w)
         return tmp
 
     def __repr__(self):
-        return (
-            self._w
-            + ("" if self.name is None else (" -> " + str(self.name)))
-            + ("" if self.wordPos is None else ("[" + str(self.wordPos) + "]"))
-        )
+        return self._w + ("" if self.name is None else (" -> " + str(self.name))) + \
+               ("[" + str(self.wordPos)+"]")
 
     def __hash__(self):
         return hash((self._w, self.name, self.wordPos))
 
     def __eq__(self, other):
         if isinstance(other, self.__class__):
-            return (
-                str(self) == str(other)
-                and self.name == other.name
-                and self.wordPos == other.wordPos
-            )
+            return str(self) == str(other) and self.name == other.name and self.wordPos == other.wordPos
         return False
 
     def __str__(self):
