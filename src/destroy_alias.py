@@ -30,7 +30,7 @@ def get_items(filename, column, separator="\t", target_dict=None):
             item = (
                     key,
                     target_dict[key].match_cnt,
-                    target_dict.match_sources[0]
+                    target_dict[key].match_sources[0]
             )
             items.add(item[column])
     return items
