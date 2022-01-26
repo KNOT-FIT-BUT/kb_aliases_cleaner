@@ -1,0 +1,3 @@
+[submodule "namegen"]
+	path = namegen
+	url = https://github.com/KNOT-FIT-BUT/namegen.git
