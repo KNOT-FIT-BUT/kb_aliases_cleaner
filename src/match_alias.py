@@ -29,7 +29,7 @@ ODD_CHARACTERS = [".", ",", "/", "_", "\\", "|", "+", "*", "&", "%", "$"]
 
 
 class Match:
-    """ Class representing match of line with alias """
+    """Class representing match of line with alias"""
 
     def __init__(self, line=0, name=None, dis_name=None, matched_alias=None):
         self.line = line
@@ -43,12 +43,12 @@ class Match:
         return entry
 
     def increment_match_cnt(self):
-        """ increments count of matched lines for matched alias """
+        """increments count of matched lines for matched alias"""
         self.matched_alias.match_cnt += 1
 
 
 class Alias:
-    """ Class representing an alias found it KB """
+    """Class representing an alias found it KB"""
 
     def __init__(self, alias=None, match=None):
         self.alias = alias
@@ -64,7 +64,7 @@ class Alias:
         return entry
 
     def alias_in_line(self, line, match_dict):
-        """ Checks whether an alias is in a line """
+        """Checks whether an alias is in a line"""
         self.match_cnt += 1
         try:
             match_dict[self.alias].append(
@@ -76,7 +76,7 @@ class Alias:
             ]
 
     def group_alias(self, new_match=None):
-        """ Groups different sources of the same alias together """
+        """Groups different sources of the same alias together"""
         self.match_lines.append(str(new_match[LINE]))
         self.match_sources.append(new_match[NAME])
 
@@ -113,7 +113,7 @@ def match_aliases(filename, aliases, aliases_dict, match_dict):
 
 
 def find_odd_aliases(aliases):
-    """ Finds all odd aliases in set of aliases and returns them """
+    """Finds all odd aliases in set of aliases and returns them"""
     odd_aliases = set()
     for alias in aliases:
         if is_odd_alias(alias):
@@ -135,7 +135,7 @@ def is_odd_alias(alias):
 
 
 def contains_odd_character(word):
-    """ Checks if word contains one of odd characters """
+    """Checks if word contains one of odd characters"""
     for letter in word:
         if letter in ODD_CHARACTERS:
             return True
@@ -143,13 +143,13 @@ def contains_odd_character(word):
 
 
 def update_matches(aliases, line, aliases_dict, match_dict):
-    """ Updates dictionary of matches """
+    """Updates dictionary of matches"""
     for alias in aliases:
         aliases_dict[alias].alias_in_line(line, match_dict)
 
 
 def write_matches(filename, match_dict):
-    """ Takes matches dictionary and writes corresponding info to the file """
+    """Takes matches dictionary and writes corresponding info to the file"""
     with open(filename, "w") as aliases_match:
         sorted_match_dict = {
             k: v
@@ -163,7 +163,7 @@ def write_matches(filename, match_dict):
 
 
 def write_aliases(filename, alias_dict):
-    """ Takes aliases and writes them to a file """
+    """Takes aliases and writes them to a file"""
     with open(filename, "w") as aliases_file:
         for alias in alias_dict.keys():
             aliases_file.write(alias + "\n")
@@ -192,7 +192,7 @@ def write_numbered_aliases(filename, alias_dict):
 
 
 def extract_aliases(line):
-    """ Extracts aliases from line, then splits them them and returns them """
+    """Extracts aliases from line, then splits them them and returns them"""
     aliases = [alias.partition("#")[0] for alias in line[POS_ALIAS].split("|")]
     names = line[POS_NAME].split("|")
     dis_names = line[POS_DIS_NAME].split("|")

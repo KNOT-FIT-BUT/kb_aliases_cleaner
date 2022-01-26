@@ -42,14 +42,16 @@ class MorphCategoryInvalidValueException(MorphCategoryException):
     def __init__(self, category, value):
         """
         Konstruktor pro vyjímku nevalidní hodnoty.
-        
+
         :param category: Označení kategorie.
         :type category: str
         :param value: Hodnota způsobující potíže.
         :type value: str
         """
         self.code = Errors.ErrorMessenger.CODE_MORPH_ENUM_INVALID_VALUE
-        self.message = Errors.ErrorMessenger.getMessage(self.code).format(category, value)
+        self.message = Errors.ErrorMessenger.getMessage(self.code).format(
+            category, value
+        )
 
 
 class MorphCategory(Enum):
@@ -61,7 +63,7 @@ class MorphCategory(Enum):
     def category():
         """
         Morfologická kategorie.
-        
+
         :return: Morfoligická kategorie jejiž hodnoty jsou reprezentovány tímto enumem.
         :rtype: MorphCategories
         """
@@ -106,7 +108,9 @@ class MorphCategory(Enum):
 
 MorphCategory._mappingLntrf = {e: str(e.value) for e in MorphCategory}
 """Zobrazení sloužící pro konverzi s LNTRF."""
-MorphCategory._mappingLntrfInverse = {v: k for k, v in MorphCategory._mappingLntrf.items()}
+MorphCategory._mappingLntrfInverse = {
+    v: k for k, v in MorphCategory._mappingLntrf.items()
+}
 """Inverzní zobrazení k _mappingLntrf."""
 
 
@@ -171,7 +175,7 @@ class MorphCategories(Enum):
         Tedy pokud je MorphCategories typu POS, pak očekává lntrf hodnoty pro POS.
         Příklad:
         1 -> POS.NOUN
-        
+
         :param val: Lntrf hodnota, ze které bude vytvořeno MorphCategory.
         :type val: str
         :return: Odpovídající mluvnickou kategorii.
@@ -203,6 +207,7 @@ class POS(MorphCategory):
     """
     Slovní druhy.
     """
+
     NOUN = 1
     """podstatné jméno"""
 
@@ -395,7 +400,9 @@ class DegreeOfComparison(MorphCategory):
 
 DegreeOfComparison._mappingLntrf = {e: str(e.value) for e in DegreeOfComparison}
 """Zobrazení sloužící pro konverzi z LNTRF."""
-DegreeOfComparison._mappingLntrfInverse = {v: k for k, v in DegreeOfComparison._mappingLntrf.items()}
+DegreeOfComparison._mappingLntrfInverse = {
+    v: k for k, v in DegreeOfComparison._mappingLntrf.items()
+}
 """Inverzní zobrazení k _mappingLntrf."""
 
 
@@ -431,6 +438,7 @@ class StylisticFlag(MorphCategory):
     """
     Stylistický příznak.
     """
+
     ARCHAISM = "A"
     """archaismus"""
 
@@ -465,7 +473,9 @@ class StylisticFlag(MorphCategory):
 
 StylisticFlag._mappingLntrf = {e: str(e.value) for e in StylisticFlag}
 """Zobrazení sloužící pro konverzi z LNTRF."""
-StylisticFlag._mappingLntrfInverse = {v: k for k, v in StylisticFlag._mappingLntrf.items()}
+StylisticFlag._mappingLntrfInverse = {
+    v: k for k, v in StylisticFlag._mappingLntrf.items()
+}
 """Inverzní zobrazení k _mappingLntrf."""
 
 
@@ -523,6 +533,6 @@ MorphCategories._lntrfCatMap = {
     MorphCategories.DEGREE_OF_COMPARISON: DegreeOfComparison.fromLntrf,
     MorphCategories.PERSON: Person.fromLntrf,
     MorphCategories.STYLISTIC_FLAG: StylisticFlag.fromLntrf,
-    MorphCategories.NOTE: Note.fromLntrf
+    MorphCategories.NOTE: Note.fromLntrf,
 }
 """Zobrazení pro lntrf konverzi. Pro tvorbu MorphCategory z lntrf hodnoty s ohledem na aktuální použitou hodnotu z MorphCategories."""

@@ -46,7 +46,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--destroy",
         help="destructable mode, the aliases in input file will be erased, if"
-             "there the output file is set, then this option will be ignored",
+        "there the output file is set, then this option will be ignored",
         action="store_true",
     )
     parser.add_argument(
@@ -59,14 +59,14 @@ if __name__ == "__main__":
         "--input-file",
         help="path to the input knowledge base",
         type=str,
-        default='./KB.tsv',
+        default="./KB.tsv",
     )
     parser.add_argument(
         "-o",
         "--output-file",
         help="path to the output file",
         type=str,
-        default='./KB.tsv',
+        default="./KB.tsv",
     )
     parser.add_argument(
         "-t",
@@ -77,14 +77,14 @@ if __name__ == "__main__":
     )
     args = vars(parser.parse_args())
 
-    match_alias.find_problematic_aliases(args['output_file'], alias_dict)
+    match_alias.find_problematic_aliases(args["output_file"], alias_dict)
 
     aliases = set(alias_dict.keys())
     aliases_to_remove = match_alias.find_odd_aliases(aliases)
     aliases.symmetric_difference_update(aliases_to_remove)
 
-    match_alias.match_aliases(args['output_file'], aliases, alias_dict, match_dict)
-    match_alias.remove_useless_matches(alias_dict, match_dict, args['threshold'])
+    match_alias.match_aliases(args["output_file"], aliases, alias_dict, match_dict)
+    match_alias.remove_useless_matches(alias_dict, match_dict, args["threshold"])
 
     if args["debug"] == True:
         match_alias.write_numbered_aliases("num_aliases.tsv", alias_dict)
@@ -109,7 +109,7 @@ if __name__ == "__main__":
             "-gn",
             "namegen_gn_output.txt",
         ],
-        input='\n'.join(namegen_input).encode('utf-8'),
+        input="\n".join(namegen_input).encode("utf-8"),
         stdout=FNULL,
         stderr=subprocess.STDOUT,
     )

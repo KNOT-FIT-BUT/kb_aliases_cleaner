@@ -32,8 +32,12 @@ class NameMorph(object):
 
     UNKNOWN_ANALYZE_FLAG = "E"
 
-    def __init__(self, forName, wordsMorphs: List[Set[Tuple[str, Union[MARule, None]]]],
-                 wordsTypes: List[Tuple[WordTypeMark, bool]]):
+    def __init__(
+        self,
+        forName,
+        wordsMorphs: List[Set[Tuple[str, Union[MARule, None]]]],
+        wordsTypes: List[Tuple[WordTypeMark, bool]],
+    ):
         """
         Vytvoření tvaru jména pro dané jméno.
 
@@ -59,25 +63,37 @@ class NameMorph(object):
     def __str__(self):
         morph = ""
 
-        for i, (wordMorphs, wordType) in enumerate(zip(self.wordsMorphs, self.wordsTypes)):
+        for i, (wordMorphs, wordType) in enumerate(
+            zip(self.wordsMorphs, self.wordsTypes)
+        ):
 
             actMorphsTags = ""
 
-            #druh slova jméno, příjmení...
+            # druh slova jméno, příjmení...
             if wordType[0] != WordTypeMark.UNKNOWN:
-                actMorphsTags = "#" + str(wordType[0].value) + (self.UNKNOWN_ANALYZE_FLAG if wordType[1] else "")
+                actMorphsTags = (
+                    "#"
+                    + str(wordType[0].value)
+                    + (self.UNKNOWN_ANALYZE_FLAG if wordType[1] else "")
+                )
 
-            #slovo / možné varianty slova s lntrf značko pravidly a druhem slova
-            morph += "/".join(wordMorph +
-                              ("[" + morphRule.lntrfWithoutNote + "]" if morphRule is not None else "") +
-                              actMorphsTags
-                              for wordMorph, morphRule in wordMorphs)
+            # slovo / možné varianty slova s lntrf značko pravidly a druhem slova
+            morph += "/".join(
+                wordMorph
+                + (
+                    "[" + morphRule.lntrfWithoutNote + "]"
+                    if morphRule is not None
+                    else ""
+                )
+                + actMorphsTags
+                for wordMorph, morphRule in wordMorphs
+            )
 
             # přidání oddělovače slov
             if i < len(self.forName.separators):
                 putSep = self.forName.separators[i]
                 # přidáváme mezeru nulové délky, pokud neni separator
-                morph += putSep if len(putSep) > 0 else u'\u200b'
+                morph += putSep if len(putSep) > 0 else u"\u200b"
 
         return morph
 
@@ -91,23 +107,24 @@ class Name(object):
         """
         Nepodařilo se vytvořit jméno. Deatil ve zprávě
         """
+
         pass
 
     class Type(object):
         """
         Přípustné druhy jmen.
-        
+
         Podporuje rozšířené porovnání pomocí ==.
         Mimo klasické rovnosti je možné se ptát i například následujícím způsobem.
-        
+
         Příklad dotazu na MainType:
             Je x lokace?
                 x == MainType.LOCATION
-        
+
         Příklad dotazu na pohlaví:
             Je x jméno ženy?
                 x== PersonGender.FEMALE
-        
+
         Zjištění zda je druh x plně určen pro výběr vhodné gramatiky (true není):
             x == None
         """
@@ -120,6 +137,7 @@ class Name(object):
             """
             Hlavní druh jména.
             """
+
             LOCATION = "L"
             EVENTS = "E"
             PERSON = "P"
@@ -131,6 +149,7 @@ class Name(object):
             """
             Pohlaví osoby.
             """
+
             MALE = "M"
             FEMALE = "F"
 
@@ -140,7 +159,7 @@ class Name(object):
         def __init__(self, nType):
             """
             Vytvoří druh jména.
-            
+
             :param nType: Druh jména.
                 #Formát řetězce pro jména osob:
                 #    <Type: P=Person>:<Subtype: F/G=Fictional/Group>:<Future purposes: determine regular name and alias>:<Gender: F/M=Female/Male>
@@ -156,12 +175,15 @@ class Name(object):
             # prozatím validujeme pouze MainType a PersonGender, protože se toho více nepoužívá.
             # Ostatní pouze uchováváme pro pozdější výpis a možnost porovnání jmen.
 
-            self.levels[self.INDEX_OF_MAIN_TYPE] = self.MainType(self.levels[self.INDEX_OF_MAIN_TYPE])
+            self.levels[self.INDEX_OF_MAIN_TYPE] = self.MainType(
+                self.levels[self.INDEX_OF_MAIN_TYPE]
+            )
             if self.levels[self.INDEX_OF_MAIN_TYPE] == self.MainType.PERSON:
                 # Jedná se o osobu, tak validujeme pohlaví.
                 if self.levels[self.INDEX_OF_PERSONS_GENDER] is not None:
                     self.levels[self.INDEX_OF_PERSONS_GENDER] = self.PersonGender(
-                        self.levels[self.INDEX_OF_PERSONS_GENDER])
+                        self.levels[self.INDEX_OF_PERSONS_GENDER]
+                    )
 
         def __hash__(self):
             """
@@ -176,19 +198,21 @@ class Name(object):
             Příklad dotazu na MainType:
                 Je x lokace?
                     x == MainType.LOCATION
-            
+
             Příklad dotazu na pohlaví:
                 Je x jméno ženy?
                     x== PersonGender.FEMALE
-            
+
             Zjištění zda je druh x plně určen pro výběr vhodné gramatiky (true není):
                 x == None
-                
+
             """
             if other is None:
                 # Zjištění zda je druh x plně určen pro výběr vhodné gramatiky
-                if self.levels[self.INDEX_OF_MAIN_TYPE] == self.MainType.PERSON and \
-                        self.levels[self.INDEX_OF_PERSONS_GENDER] == other:
+                if (
+                    self.levels[self.INDEX_OF_MAIN_TYPE] == self.MainType.PERSON
+                    and self.levels[self.INDEX_OF_PERSONS_GENDER] == other
+                ):
                     # není
                     return True
 
@@ -204,8 +228,10 @@ class Name(object):
 
             if isinstance(other, self.PersonGender):
                 # porovnání na úrovni osob
-                if self.levels[self.INDEX_OF_MAIN_TYPE] == self.MainType.PERSON and \
-                        self.levels[self.INDEX_OF_PERSONS_GENDER] == other:
+                if (
+                    self.levels[self.INDEX_OF_MAIN_TYPE] == self.MainType.PERSON
+                    and self.levels[self.INDEX_OF_PERSONS_GENDER] == other
+                ):
                     return True
 
             return False
@@ -247,13 +273,23 @@ class Name(object):
             if self._type is not None:
                 self._type = self.Type(nType)
         except ValueError:
-            raise self.NameCouldntCreateException(Errors.ErrorMessenger.CODE_INVALID_INPUT_FILE_UNKNOWN_NAME_TYPE,
-                                                  Errors.ErrorMessenger.getMessage(
-                                                      Errors.ErrorMessenger.CODE_INVALID_INPUT_FILE_UNKNOWN_NAME_TYPE) + "\n\t" + name + "\t" + nType)
+            raise self.NameCouldntCreateException(
+                Errors.ErrorMessenger.CODE_INVALID_INPUT_FILE_UNKNOWN_NAME_TYPE,
+                Errors.ErrorMessenger.getMessage(
+                    Errors.ErrorMessenger.CODE_INVALID_INPUT_FILE_UNKNOWN_NAME_TYPE
+                )
+                + "\n\t"
+                + name
+                + "\t"
+                + nType,
+            )
 
         # rozdělíme jméno na jednotlivá slova a oddělovače
         words, self._separators = self._findWords(name)
-        self._words = [wordDatabase[w] if w in wordDatabase else Word(w, self, offset) for offset, w in enumerate(words)]
+        self._words = [
+            wordDatabase[w] if w in wordDatabase else Word(w, self, offset)
+            for offset, w in enumerate(words)
+        ]
 
     def copy(self) -> "Name":
         """
@@ -262,7 +298,12 @@ class Name(object):
         :rtype: Name
         """
 
-        return Name(str(self), self._language, None if self._type is None else str(self._type), self.additionalInfo)
+        return Name(
+            str(self),
+            self._language,
+            None if self._type is None else str(self._type),
+            self.additionalInfo,
+        )
 
     def __str__(self):
         n = ""
@@ -276,7 +317,9 @@ class Name(object):
         return n
 
     def __repr__(self):
-        resAdd = str(self) + "\t" + str(self.language.code) + "\t" + str(self.type) + "\t"
+        resAdd = (
+            str(self) + "\t" + str(self.language.code) + "\t" + str(self.type) + "\t"
+        )
         if len(self.additionalInfo) > 0:
             resAdd += "\t".join(self.additionalInfo)
 
@@ -288,7 +331,11 @@ class Name(object):
 
     def __eq__(self, other):
         if isinstance(other, self.__class__):
-            return str(self) == str(other) and self._language == other._language and self._type == other._type
+            return (
+                str(self) == str(other)
+                and self._language == other._language
+                and self._type == other._type
+            )
 
         return False
 
@@ -319,14 +366,14 @@ class Name(object):
         :raise ValueError: Když není slovo přítomno.
         """
 
-        indexesSoFar=[]
+        indexesSoFar = []
         for i, w in enumerate(self):
             if w == word:
                 if all:
                     indexesSoFar.append(i)
                 else:
                     return i
-        if len(indexesSoFar)>0:
+        if len(indexesSoFar) > 0:
             return indexesSoFar
         else:
             raise ValueError("Word {} is not in name {}.".format(word, self))
@@ -346,7 +393,7 @@ class Name(object):
         res += "\t\t"
 
         if len(self.additionalInfo) > 0:
-            res += ("\t".join(self.additionalInfo))
+            res += "\t".join(self.additionalInfo)
 
         return res
 
@@ -378,8 +425,10 @@ class Name(object):
         # najdeme první podstatné nebo přídavné jméno od konce (příjmení)
         # Příjmení jak se zdá může být i přídavné jméno (`Internetová jazyková příručka <http://prirucka.ujc.cas.cz/?id=320#nadpis3>`_.)
 
-        grammars = {Name.Type.PersonGender.FEMALE: self.language.gFemale,
-                    Name.Type.PersonGender.MALE: self.language.gMale}
+        grammars = {
+            Name.Type.PersonGender.FEMALE: self.language.gFemale,
+            Name.Type.PersonGender.MALE: self.language.gMale,
+        }
         try:
             if self._language.code == "cs":
                 # pro češtinu máme i další kontroly
@@ -387,9 +436,13 @@ class Name(object):
                     if token.type == namegenPack.Grammar.Token.Type.ANALYZE:
                         # získáme možné mluvnické kategorie
                         analyze = token.word.info
-                        posCat = analyze.getAllForCategory(MorphCategories.MorphCategories.POS,
-                                                           {Case.NOMINATIVE})  # máme zájem jen o 1. pád
-                        if MorphCategories.POS.NOUN in posCat or MorphCategories.POS.ADJECTIVE in posCat:
+                        posCat = analyze.getAllForCategory(
+                            MorphCategories.MorphCategories.POS, {Case.NOMINATIVE}
+                        )  # máme zájem jen o 1. pád
+                        if (
+                            MorphCategories.POS.NOUN in posCat
+                            or MorphCategories.POS.ADJECTIVE in posCat
+                        ):
                             if token.word[-3:] in {"ová", "cká", "ská"}:
                                 # muž s přijmení končícím na ová,cká a ská zřejmě není
                                 # změníme typ pokud není ženský
@@ -433,8 +486,12 @@ class Name(object):
 
             if changeTo is not None:
 
-                if self._type == None:   #Používáme rozšířené porovnání implementované v Name.__eq__.
-                    logging.info("Pro " + str(self) + " přiřazuji " + str(changeTo) + ".")
+                if (
+                    self._type == None
+                ):  # Používáme rozšířené porovnání implementované v Name.__eq__.
+                    logging.info(
+                        "Pro " + str(self) + " přiřazuji " + str(changeTo) + "."
+                    )
                     if self._type is None:
                         # Nutné vytvořit celý nový typ.
                         # Formát pro osoby:
@@ -447,7 +504,10 @@ class Name(object):
                     cleanDeriv = False  # tyto derivace chceme použít
 
                 else:
-                    if self._type.levels[self.Type.INDEX_OF_PERSONS_GENDER] != changeTo and aTokens is not None:
+                    if (
+                        self._type.levels[self.Type.INDEX_OF_PERSONS_GENDER] != changeTo
+                        and aTokens is not None
+                    ):
                         couldNotChange = False  # příznak, že se druh nemůže změnit
                         if self._language.code == "cs":
                             # pro češtinu klademe tvrdší podmínky při změně
@@ -462,12 +522,19 @@ class Name(object):
                                     # získejme prvně druh slova ve jméně
 
                                     wordType = aT.matchingTerminal.getAttribute(
-                                        namegenPack.Grammar.Terminal.Attribute.Type.WORD_TYPE)
+                                        namegenPack.Grammar.Terminal.Attribute.Type.WORD_TYPE
+                                    )
 
-                                    if wordType.value in {WordTypeMark.GIVEN_NAME, WordTypeMark.SURNAME}:
+                                    if wordType.value in {
+                                        WordTypeMark.GIVEN_NAME,
+                                        WordTypeMark.SURNAME,
+                                    }:
                                         # kontrolujeme jen pro jméno a příjmení
 
-                                        if aT.token.type == namegenPack.Grammar.Token.Type.ANALYZE_UNKNOWN:
+                                        if (
+                                            aT.token.type
+                                            == namegenPack.Grammar.Token.Type.ANALYZE_UNKNOWN
+                                        ):
                                             # budeme provádět změnu jen v případech, kdy máme pro všechna zkoumaná slova potřebnou analýzyu
                                             couldNotChange = True
                                             break
@@ -477,10 +544,16 @@ class Name(object):
                                         conditionWord = aT.morphCategories
 
                                         # zjistíme jaké máme poznámky
-                                        notes = aT.token.word.info.getAllForCategory(MorphCategories.MorphCategories.NOTE,
-                                                                                     conditionWord)
+                                        notes = aT.token.word.info.getAllForCategory(
+                                            MorphCategories.MorphCategories.NOTE,
+                                            conditionWord,
+                                        )
 
-                                        if (Note.GIVEN_NAME if wordType.value == WordTypeMark.GIVEN_NAME else Note.SURNAME) not in notes:
+                                        if (
+                                            Note.GIVEN_NAME
+                                            if wordType.value == WordTypeMark.GIVEN_NAME
+                                            else Note.SURNAME
+                                        ) not in notes:
                                             # nemáme přislušnou poznámku v morfologické analýze nemůžeme tedy druh změnit
                                             couldNotChange = True
                                             break
@@ -488,9 +561,20 @@ class Name(object):
                                     break
 
                         if not couldNotChange:
-                            logging.info("Pro " + str(self) + " měním " + str(
-                                self._type.levels[self.Type.INDEX_OF_PERSONS_GENDER]) + " na " + str(changeTo) + ".")
-                            self._type.levels[self.Type.INDEX_OF_PERSONS_GENDER] = changeTo
+                            logging.info(
+                                "Pro "
+                                + str(self)
+                                + " měním "
+                                + str(
+                                    self._type.levels[self.Type.INDEX_OF_PERSONS_GENDER]
+                                )
+                                + " na "
+                                + str(changeTo)
+                                + "."
+                            )
+                            self._type.levels[
+                                self.Type.INDEX_OF_PERSONS_GENDER
+                            ] = changeTo
                             cleanDeriv = False  # tyto derivace chceme použít
 
         except Word.WordCouldntGetInfoException:
@@ -525,7 +609,7 @@ class Name(object):
         :type newWords:List[Word]
         """
 
-        self._words=newWords
+        self._words = newWords
 
     @property
     def separators(self):
@@ -583,7 +667,14 @@ class Name(object):
                     # budeme delit
                     separatorOccured = True
                     parsingNumeric = False
-                elif c == "." and not parsingNumeric and (offsetC+1 < len(name) and not Name.isSeparator(name[offsetC+1])):
+                elif (
+                    c == "."
+                    and not parsingNumeric
+                    and (
+                        offsetC + 1 < len(name)
+                        and not Name.isSeparator(name[offsetC + 1])
+                    )
+                ):
                     # tečka na konci slova, které není číslicí a nestoji před separátorem
                     actWord += c
                     separatorOccured = True
@@ -617,7 +708,7 @@ class Name(object):
         :rtype: bool
         """
 
-        return c.isspace() or c == '-' or c == '–' or c == ','
+        return c.isspace() or c == "-" or c == "–" or c == ","
 
     def simpleWordsTypesGuess(self, tokens: List[namegenPack.Grammar.Token] = None):
         """
@@ -638,13 +729,16 @@ class Name(object):
 
         if len(tokens) == 2:
             # jednoslovné
-            if self.Type.INDEX_OF_FUTURE_PURPOSES < len(self._type.levels) \
-                    and self._type.levels[self.Type.INDEX_OF_FUTURE_PURPOSES] in {"N", "P"}:
+            if self.Type.INDEX_OF_FUTURE_PURPOSES < len(
+                self._type.levels
+            ) and self._type.levels[self.Type.INDEX_OF_FUTURE_PURPOSES] in {"N", "P"}:
                 # jednoslovný alias
                 types.append(namegenPack.Word.WordTypeMark.ALIAS)
         elif len(tokens) == 3:
-            #dvojslovné
-            if (self._type == self.Type.PersonGender.FEMALE or self._type == None) and self._words[-1][-3:] == "ová":
+            # dvojslovné
+            if (
+                self._type == self.Type.PersonGender.FEMALE or self._type == None
+            ) and self._words[-1][-3:] == "ová":
                 # ženské dvojslovné jméno končící na ová
                 types.append(namegenPack.Word.WordTypeMark.GIVEN_NAME)
                 types.append(namegenPack.Word.WordTypeMark.SURNAME)
@@ -657,8 +751,11 @@ class Name(object):
 
         return types
 
-    def genMorphs(self, analyzedTokens: List[namegenPack.Grammar.AnalyzedToken],
-                  missingCaseToken: Set[Tuple[namegenPack.Grammar.AnalyzedToken, Case]] = None):
+    def genMorphs(
+        self,
+        analyzedTokens: List[namegenPack.Grammar.AnalyzedToken],
+        missingCaseToken: Set[Tuple[namegenPack.Grammar.AnalyzedToken, Case]] = None,
+    ):
         """
         Na základě slovům odpovídajících analyzovaných tokenů ve jméně vygeneruje tvary jména.
         Pokusí se vygenerovat všech sedm pádů, pokud nebude možné nějaké vygenerovat vrátí alespoň ty, které
@@ -689,7 +786,9 @@ class Name(object):
                         cateMorph.add(x)
 
                 # ještě získáme flagy, pro filtraci
-                groupFlags = aToken.matchingTerminal.getAttribute(Terminal.Attribute.Type.FLAGS)
+                groupFlags = aToken.matchingTerminal.getAttribute(
+                    Terminal.Attribute.Type.FLAGS
+                )
                 groupFlags = set() if groupFlags is None else groupFlags.value
 
                 genMorphsForWords.append(word.morphs(cateMorph, cateWord, groupFlags))
@@ -702,15 +801,22 @@ class Name(object):
         morphs = []
 
         if self.grammar.flexible:
-            cases = [Case.NOMINATIVE, Case.GENITIVE, Case.DATIVE, Case.ACCUSATIVE, Case.VOCATIVE, Case.LOCATIVE,
-                     Case.INSTRUMENTAL]
+            cases = [
+                Case.NOMINATIVE,
+                Case.GENITIVE,
+                Case.DATIVE,
+                Case.ACCUSATIVE,
+                Case.VOCATIVE,
+                Case.LOCATIVE,
+                Case.INSTRUMENTAL,
+            ]
         else:
             # neohebná gramatika (angličtina apod.) nechcem další tvary
             cases = [Case.NOMINATIVE]
 
         for c in cases:  # pády
-            wordsTypes=[]
-            wordsWithRules=[]
+            wordsTypes = []
+            wordsWithRules = []
             for i, (word, aToken) in enumerate(zip(self._words, analyzedTokens)):
 
                 if aToken.morph and isinstance(genMorphsForWords[i], set):
@@ -718,13 +824,15 @@ class Name(object):
 
                     morphsThatWeAlreadyHaves = set()
 
-                    morphsWithRules=set()
+                    morphsWithRules = set()
 
                     for maRule, wordMorph in genMorphsForWords[i]:
                         # najdeme tvar slova pro daný pád
                         try:
                             if maRule[MorphCategories.MorphCategories.CASE] == c:
-                                actMorph = wordMorph + "[" + maRule.lntrfWithoutNote + "]"
+                                actMorph = (
+                                    wordMorph + "[" + maRule.lntrfWithoutNote + "]"
+                                )
 
                                 if actMorph in morphsThatWeAlreadyHaves:
                                     # Díky tomu, že nezohledňujeme poznámku při výpisu,
@@ -735,25 +843,35 @@ class Name(object):
                                 morphsThatWeAlreadyHaves.add(actMorph)
                                 morphsWithRules.add((wordMorph, maRule))
 
-
                         except KeyError:
                             # pravděpodobně nemá pád vůbec
                             pass
 
-                    if len(morphsWithRules)==0:
+                    if len(morphsWithRules) == 0:
                         # nepovedlo se získat aktuální pád pro aktuální slovo
                         if missingCaseToken is not None:
                             missingCaseToken.add((aToken, c))
                     else:
                         wordsWithRules.append(morphsWithRules)
-                        wordsTypes.append((aToken.matchingTerminal.getAttribute(
-                            namegenPack.Grammar.Terminal.Attribute.Type.WORD_TYPE).value, False))
+                        wordsTypes.append(
+                            (
+                                aToken.matchingTerminal.getAttribute(
+                                    namegenPack.Grammar.Terminal.Attribute.Type.WORD_TYPE
+                                ).value,
+                                False,
+                            )
+                        )
                 else:
                     # neohýbáme
                     wordsWithRules.append({(str(word), None)})
-                    wordsTypes.append((aToken.matchingTerminal.getAttribute(
-                        namegenPack.Grammar.Terminal.Attribute.Type.WORD_TYPE).value,
-                               aToken.token.type == Token.Type.ANALYZE_UNKNOWN))
+                    wordsTypes.append(
+                        (
+                            aToken.matchingTerminal.getAttribute(
+                                namegenPack.Grammar.Terminal.Attribute.Type.WORD_TYPE
+                            ).value,
+                            aToken.token.type == Token.Type.ANALYZE_UNKNOWN,
+                        )
+                    )
 
             if len(wordsWithRules) == len(self._words):
                 # máme tvar pro všechna slova
@@ -767,7 +885,9 @@ class Name(object):
         return morphs
 
     @staticmethod
-    def getWordsOfType(wordType: WordTypeMark, analyzedTokens: List[namegenPack.Grammar.AnalyzedToken]):
+    def getWordsOfType(
+        wordType: WordTypeMark, analyzedTokens: List[namegenPack.Grammar.AnalyzedToken]
+    ):
         """
         Na základě slovům odpovídajících analyzovaných tokenů ve jméně vybere slova daného typu.
 
@@ -780,14 +900,21 @@ class Name(object):
         """
         selection = []
         for aToken in analyzedTokens:
-            if aToken.matchingTerminal.getAttribute(
-                    namegenPack.Grammar.Terminal.Attribute.Type.WORD_TYPE).value == wordType:
+            if (
+                aToken.matchingTerminal.getAttribute(
+                    namegenPack.Grammar.Terminal.Attribute.Type.WORD_TYPE
+                ).value
+                == wordType
+            ):
                 # získáme příslušná pravidla
 
                 cateFilters = aToken.morphCategories  # podmínky na původní slovo
 
-                rules = {r for r, w in aToken.token.word.morphs(cateFilters, cateFilters) if
-                         str(w) == str(aToken.token.word)}
+                rules = {
+                    r
+                    for r, w in aToken.token.word.morphs(cateFilters, cateFilters)
+                    if str(w) == str(aToken.token.word)
+                }
                 selection.append((aToken.token.word, {r for r in rules}))
 
         return selection
@@ -816,13 +943,17 @@ class Name(object):
                 g = self.language.gEvents
             else:
                 # je cosi prohnilého ve stavu tohoto programu
-                raise Errors.ExceptionMessageCode(Errors.ErrorMessenger.CODE_ALL_VALUES_NOT_COVERED)
+                raise Errors.ExceptionMessageCode(
+                    Errors.ErrorMessenger.CODE_ALL_VALUES_NOT_COVERED
+                )
 
             return g
 
         except KeyError:
             # je cosi prohnilého ve stavu tohoto programu
-            raise Errors.ExceptionMessageCode(Errors.ErrorMessenger.CODE_ALL_VALUES_NOT_COVERED)
+            raise Errors.ExceptionMessageCode(
+                Errors.ErrorMessenger.CODE_ALL_VALUES_NOT_COVERED
+            )
 
 
 class NameReader(object):
@@ -831,7 +962,13 @@ class NameReader(object):
 
     """
 
-    def __init__(self, languages: Dict[str, Language], langDef: str, inputFile=None, shouldSort:bool=True):
+    def __init__(
+        self,
+        languages: Dict[str, Language],
+        langDef: str,
+        inputFile=None,
+        shouldSort: bool = True,
+    ):
         """
         Konstruktor
 
@@ -880,8 +1017,14 @@ class NameReader(object):
 
             if len(parts) < 3:
                 # nevalidní formát vstupu
-                print(Errors.ErrorMessenger.getMessage(Errors.ErrorMessenger.CODE_INVALID_NAME) + "\t" + line,
-                      file=sys.stderr)
+                print(
+                    Errors.ErrorMessenger.getMessage(
+                        Errors.ErrorMessenger.CODE_INVALID_NAME
+                    )
+                    + "\t"
+                    + line,
+                    file=sys.stderr,
+                )
                 self._errorCnt += 1
                 continue
             try:
@@ -898,7 +1041,9 @@ class NameReader(object):
                 except KeyError:
                     lang = None
 
-                self.names.append(Name(parts[0], lang, parts[2], additInfo, wordDatabase))
+                self.names.append(
+                    Name(parts[0], lang, parts[2], additInfo, wordDatabase)
+                )
             except Name.NameCouldntCreateException as e:
                 # problém při vytváření jména
                 print(e.message, file=sys.stderr)
@@ -946,7 +1091,6 @@ class NameReader(object):
         Jinak pouze oznámí do logu.
         """
 
-
         filteredNames = []
         for name in self:
 
@@ -964,6 +1108,3 @@ class NameReader(object):
                 continue
 
         self.names = filteredNames
-
-
-

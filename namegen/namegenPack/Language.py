@@ -41,9 +41,18 @@ class Language(object):
     :vartype lex: Lex
     """
 
-    def __init__(self, langFolder: str, gFemale: str, gMale: str, gLocations: str, gEvents: str, titles: str, eqGen: str,
-                 ma: str,
-                 gTimeout: Optional[int]):
+    def __init__(
+        self,
+        langFolder: str,
+        gFemale: str,
+        gMale: str,
+        gLocations: str,
+        gEvents: str,
+        titles: str,
+        eqGen: str,
+        ma: str,
+        gTimeout: Optional[int],
+    ):
         """
         Načte jazyk z jeho složky.
 
@@ -91,8 +100,6 @@ class Language(object):
 
         self.titles = self._readTitles(os.path.join(langFolder, titles))
 
-
-
         with open(os.path.join(langFolder, eqGen), "r") as f:
             self.eqGen = ast.literal_eval(f.read())
 
@@ -109,7 +116,7 @@ class Language(object):
         :raise ExceptionMessageCode: Musí být inicializován pomocí :func:`~Language.Language.initMAnalyzer` jinak
         exception.
         """
-        
+
         if self._ma is None:
             raise ExceptionMessageCode(ErrorMessenger.CODE_LANGUAGE_NOT_INIT_MA)
         return self._ma
@@ -142,6 +149,3 @@ class Language(object):
                         titles.add(t)
 
         return titles
-
-
-

@@ -21,7 +21,12 @@ df = pandas.read_csv(sys.argv[1], sep="\t")
 for lng in df["language"].unique():
     lng_df = df[df["language"] == lng]
     for gram_t in lng_df["grammar type"].unique():
-        representatives = lng_df[lng_df["grammar type"] == gram_t]["class representative"]
-        with open(Path(sys.argv[2]).joinpath("min_"+lng+"_"+Path(gram_t).stem+".tsv"), "w") as f:
+        representatives = lng_df[lng_df["grammar type"] == gram_t][
+            "class representative"
+        ]
+        with open(
+            Path(sys.argv[2]).joinpath("min_" + lng + "_" + Path(gram_t).stem + ".tsv"),
+            "w",
+        ) as f:
             for r in representatives:
                 print(r, file=f)

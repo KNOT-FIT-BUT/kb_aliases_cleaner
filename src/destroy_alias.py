@@ -27,17 +27,13 @@ def get_items(filename, column, separator="\t", target_dict=None):
             items.add(line.split(separator)[column])
     else:
         for key in target_dict:
-            item = (
-                    key,
-                    target_dict[key].match_cnt,
-                    target_dict[key].match_sources[0]
-            )
+            item = (key, target_dict[key].match_cnt, target_dict[key].match_sources[0])
             items.add(item[column])
     return items
 
 
 if __name__ == "__main__":
-    """ This main entrypoint shows example usage of this module, to get
+    """This main entrypoint shows example usage of this module, to get
     data from file/dictionary and how to filter them from the KB"""
 
     targets = get_items("num_aliases.tsv", TARGETS)

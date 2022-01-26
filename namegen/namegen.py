@@ -39,6 +39,7 @@ class ConfigManagerInvalidException(Errors.ExceptionMessageCode):
     """
     Nevalidní konfigurace
     """
+
     pass
 
 
@@ -71,14 +72,20 @@ class ConfigManager(object):
         try:
             self.configParser.read(filesPaths)
         except configparser.ParsingError as e:
-            raise ConfigManagerInvalidException(Errors.ErrorMessenger.CODE_INVALID_CONFIG,
-                                                "Nevalidní konfigurační soubor: " + str(e))
+            raise ConfigManagerInvalidException(
+                Errors.ErrorMessenger.CODE_INVALID_CONFIG,
+                "Nevalidní konfigurační soubor: " + str(e),
+            )
 
         return self.__transformVals()
 
     @staticmethod
     def getAbsolutePath(path):
-        return ("{}/".format(os.path.dirname(os.path.abspath(__file__))) if path[:1] == '.' else "") + path
+        return (
+            "{}/".format(os.path.dirname(os.path.abspath(__file__)))
+            if path[:1] == "."
+            else ""
+        ) + path
 
     def __transformVals(self) -> Dict[str, Dict[str, Any]]:
         """
@@ -88,10 +95,13 @@ class ConfigManager(object):
         :raise ConfigManagerInvalidException: Pokud je konfigurační soubor nevalidní.
         """
 
-        return {self.sectionDefault: self.__transformDefaults(), self.sectionFilters: self.__transformFilters(),
-                self.sectionDataFiles: self.__transformDataFiles(),
-                self.sectionGenerators: self.__transformGenerators(),
-                self.sectionGrammar: self.__transformGrammar()}
+        return {
+            self.sectionDefault: self.__transformDefaults(),
+            self.sectionFilters: self.__transformFilters(),
+            self.sectionDataFiles: self.__transformDataFiles(),
+            self.sectionGenerators: self.__transformGenerators(),
+            self.sectionGrammar: self.__transformGrammar(),
+        }
 
     def __transformDefaults(self):
         """
@@ -102,19 +112,24 @@ class ConfigManager(object):
         """
 
         result = {
-            "ALLOW_PRIORITY_FILTRATION":
-                self.configParser[self.sectionDefault]["ALLOW_PRIORITY_FILTRATION"].lower() == "true"
+            "ALLOW_PRIORITY_FILTRATION": self.configParser[self.sectionDefault][
+                "ALLOW_PRIORITY_FILTRATION"
+            ].lower()
+            == "true"
         }
 
         # nastavení locale
         if self.configParser[self.sectionDefault]["LC_ALL"]:
             try:
-                locale.setlocale(locale.LC_ALL, self.configParser[self.sectionDefault]["LC_ALL"])
+                locale.setlocale(
+                    locale.LC_ALL, self.configParser[self.sectionDefault]["LC_ALL"]
+                )
             except locale.Error:
                 raise ConfigManagerInvalidException(
                     Errors.ErrorMessenger.CODE_INVALID_CONFIG,
-                    "Nevalidní konfigurační soubor. Nepodařilo se nastavit LC_ALL: " +
-                    self.configParser[self.sectionDefault]["LC_ALL"])
+                    "Nevalidní konfigurační soubor. Nepodařilo se nastavit LC_ALL: "
+                    + self.configParser[self.sectionDefault]["LC_ALL"],
+                )
         return result
 
     def __transformFilters(self):
@@ -124,25 +139,40 @@ class ConfigManager(object):
         :returns: dict -- ve formátu jméno prametru jako klíč a k němu hodnota parametru
         :raise ConfigManagerInvalidException: Pokud je konfigurační soubor nevalidní.
         """
-        result = {"LANGUAGES": None, "REGEX_NAME": None, "ALLOWED_ALPHABETIC_CHARACTERS": None, "SCRIPT": None}
+        result = {
+            "LANGUAGES": None,
+            "REGEX_NAME": None,
+            "ALLOWED_ALPHABETIC_CHARACTERS": None,
+            "SCRIPT": None,
+        }
 
         if self.configParser[self.sectionFilters]["LANGUAGES"]:
-            result["LANGUAGES"] = set(l for l in self.configParser[self.sectionFilters]["LANGUAGES"].split())
+            result["LANGUAGES"] = set(
+                l for l in self.configParser[self.sectionFilters]["LANGUAGES"].split()
+            )
 
         if self.configParser[self.sectionFilters]["REGEX_NAME"]:
             try:
-                result["REGEX_NAME"] = re.compile(self.configParser[self.sectionFilters]["REGEX_NAME"])
+                result["REGEX_NAME"] = re.compile(
+                    self.configParser[self.sectionFilters]["REGEX_NAME"]
+                )
             except re.error:
                 # Nevalidní regex
 
                 raise ConfigManagerInvalidException(
                     Errors.ErrorMessenger.CODE_INVALID_CONFIG,
                     "Nevalidní konfigurační soubor. Nevalidní regulární výraz v "
-                    + self.sectionFilters + " u REGEX_NAME.")
+                    + self.sectionFilters
+                    + " u REGEX_NAME.",
+                )
 
         if self.configParser[self.sectionFilters]["ALLOWED_ALPHABETIC_CHARACTERS"]:
             result["ALLOWED_ALPHABETIC_CHARACTERS"] = set(
-                c for c in self.configParser[self.sectionFilters]["ALLOWED_ALPHABETIC_CHARACTERS"].split())
+                c
+                for c in self.configParser[self.sectionFilters][
+                    "ALLOWED_ALPHABETIC_CHARACTERS"
+                ].split()
+            )
 
         if self.configParser[self.sectionFilters]["SCRIPT"]:
             result["SCRIPT"] = self.configParser[self.sectionFilters]["SCRIPT"]
@@ -158,24 +188,34 @@ class ConfigManager(object):
         """
 
         result = {
-            "ABBRE_FORM_OF_PREPOSITIONS":
-                self.configParser[self.sectionGenerators]["ABBRE_FORM_OF_PREPOSITIONS"].lower() == "true",
-            "ABBRE_FORM_OF_PREPOSITIONS_USE_ON": set()
+            "ABBRE_FORM_OF_PREPOSITIONS": self.configParser[self.sectionGenerators][
+                "ABBRE_FORM_OF_PREPOSITIONS"
+            ].lower()
+            == "true",
+            "ABBRE_FORM_OF_PREPOSITIONS_USE_ON": set(),
         }
 
-        for nameT in self.configParser[self.sectionGenerators]["ABBRE_FORM_OF_PREPOSITIONS_USE_ON"].split():
+        for nameT in self.configParser[self.sectionGenerators][
+            "ABBRE_FORM_OF_PREPOSITIONS_USE_ON"
+        ].split():
             try:
                 if nameT == "M":  # obecně muži
-                    result["ABBRE_FORM_OF_PREPOSITIONS_USE_ON"].add(Name.Type.PersonGender.MALE)
+                    result["ABBRE_FORM_OF_PREPOSITIONS_USE_ON"].add(
+                        Name.Type.PersonGender.MALE
+                    )
                 elif nameT == "F":  # obecně ženy
-                    result["ABBRE_FORM_OF_PREPOSITIONS_USE_ON"].add(Name.Type.PersonGender.FEMALE)
+                    result["ABBRE_FORM_OF_PREPOSITIONS_USE_ON"].add(
+                        Name.Type.PersonGender.FEMALE
+                    )
                 else:
                     result["ABBRE_FORM_OF_PREPOSITIONS_USE_ON"].add(Name.Type(nameT))
             except ValueError:
                 # Nevalidní druh terminálu
                 raise ConfigManagerInvalidException(
                     Errors.ErrorMessenger.CODE_INVALID_CONFIG,
-                    "Nevalidní konfigurační soubor. ABBRE_FORM_OF_PREPOSITIONS_USE_ON: " + nameT)
+                    "Nevalidní konfigurační soubor. ABBRE_FORM_OF_PREPOSITIONS_USE_ON: "
+                    + nameT,
+                )
 
         return result
 
@@ -188,15 +228,19 @@ class ConfigManager(object):
         """
 
         result = {
-            "PARSE_UNKNOWN_ANALYZE": True if self.configParser[self.sectionGrammar][
-                                                 "PARSE_UNKNOWN_ANALYZE"].lower() == "true" else False,
+            "PARSE_UNKNOWN_ANALYZE": True
+            if self.configParser[self.sectionGrammar]["PARSE_UNKNOWN_ANALYZE"].lower()
+            == "true"
+            else False,
             "PARSE_UNKNOWN_ANALYZE_TERMINAL_MATCH": set(),
             "TIMEOUT": None,
         }
 
         if result["PARSE_UNKNOWN_ANALYZE"]:
 
-            for t in self.configParser[self.sectionGrammar]["PARSE_UNKNOWN_ANALYZE_TERMINAL_MATCH"].split():
+            for t in self.configParser[self.sectionGrammar][
+                "PARSE_UNKNOWN_ANALYZE_TERMINAL_MATCH"
+            ].split():
                 try:
                     result["PARSE_UNKNOWN_ANALYZE_TERMINAL_MATCH"].add(Terminal.Type(t))
                 except ValueError:
@@ -204,11 +248,15 @@ class ConfigManager(object):
 
                     raise ConfigManagerInvalidException(
                         Errors.ErrorMessenger.CODE_INVALID_CONFIG,
-                        "Nevalidní konfigurační soubor. PARSE_UNKNOWN_ANALYZE_TERMINAL_MATCH: " + t)
+                        "Nevalidní konfigurační soubor. PARSE_UNKNOWN_ANALYZE_TERMINAL_MATCH: "
+                        + t,
+                    )
 
         try:
             if self.configParser[self.sectionGrammar]["TIMEOUT"].upper() != "NONE":
-                result["TIMEOUT"] = int(self.configParser[self.sectionGrammar]["TIMEOUT"])
+                result["TIMEOUT"] = int(
+                    self.configParser[self.sectionGrammar]["TIMEOUT"]
+                )
                 if result["TIMEOUT"] <= 0:
                     raise ValueError
         except ValueError:
@@ -216,8 +264,11 @@ class ConfigManager(object):
 
             raise ConfigManagerInvalidException(
                 Errors.ErrorMessenger.CODE_INVALID_CONFIG,
-                "Nevalidní konfigurační soubor. " + self.sectionGrammar + "/TIMEOUT: " +
-                self.configParser[self.sectionGrammar]["TIMEOUT"])
+                "Nevalidní konfigurační soubor. "
+                + self.sectionGrammar
+                + "/TIMEOUT: "
+                + self.configParser[self.sectionGrammar]["TIMEOUT"],
+            )
         return result
 
     def __transformDataFiles(self):
@@ -230,22 +281,35 @@ class ConfigManager(object):
 
         result = {
             "GRAMMAR_MALE": self.configParser[self.sectionDataFiles]["GRAMMAR_MALE"],
-            "GRAMMAR_FEMALE": self.configParser[self.sectionDataFiles]["GRAMMAR_FEMALE"],
-            "GRAMMAR_LOCATIONS": self.configParser[self.sectionDataFiles]["GRAMMAR_LOCATIONS"],
-            "GRAMMAR_EVENTS": self.configParser[self.sectionDataFiles]["GRAMMAR_EVENTS"],
-            "DEFAULT_LANGUAGE": self.configParser[self.sectionDataFiles]["DEFAULT_LANGUAGE"],
+            "GRAMMAR_FEMALE": self.configParser[self.sectionDataFiles][
+                "GRAMMAR_FEMALE"
+            ],
+            "GRAMMAR_LOCATIONS": self.configParser[self.sectionDataFiles][
+                "GRAMMAR_LOCATIONS"
+            ],
+            "GRAMMAR_EVENTS": self.configParser[self.sectionDataFiles][
+                "GRAMMAR_EVENTS"
+            ],
+            "DEFAULT_LANGUAGE": self.configParser[self.sectionDataFiles][
+                "DEFAULT_LANGUAGE"
+            ],
             "TITLES": self.configParser[self.sectionDataFiles]["TITLES"],
             "EQ_GEN": self.configParser[self.sectionDataFiles]["EQ_GEN"],
             "MA": self.configParser[self.sectionDataFiles]["MA"],
-            "LANGUAGES_DIRECTORY": self.__makePath(self.configParser[self.sectionDataFiles]["LANGUAGES"])
+            "LANGUAGES_DIRECTORY": self.__makePath(
+                self.configParser[self.sectionDataFiles]["LANGUAGES"]
+            ),
         }
 
         # koukneme jestli je tu opravdu vychozi jazyk
 
-        if result["DEFAULT_LANGUAGE"] not in \
-                set(os.listdir(result["LANGUAGES_DIRECTORY"])):
-            raise ConfigManagerInvalidException(Errors.ErrorMessenger.CODE_INVALID_CONFIG,
-                                                f"Nenašel jsem výchozí jazyk DEFAULT_LANGUAGE={result['DEFAULT_LANGUAGE']}.")
+        if result["DEFAULT_LANGUAGE"] not in set(
+            os.listdir(result["LANGUAGES_DIRECTORY"])
+        ):
+            raise ConfigManagerInvalidException(
+                Errors.ErrorMessenger.CODE_INVALID_CONFIG,
+                f"Nenašel jsem výchozí jazyk DEFAULT_LANGUAGE={result['DEFAULT_LANGUAGE']}.",
+            )
 
         return result
 
@@ -264,10 +328,12 @@ class ConfigManager(object):
             if parConf[k]:
                 result[k] = self.__makePath(parConf[k])
             else:
-                raise ConfigManagerInvalidException(Errors.ErrorMessenger.CODE_INVALID_CONFIG, "Nevalidní "
-                                                                                               "konfigurační soubor. "
-                                                                                               "Chybí " +
-                                                    self.sectionDataFiles + " -> " + k)
+                raise ConfigManagerInvalidException(
+                    Errors.ErrorMessenger.CODE_INVALID_CONFIG,
+                    "Nevalidní "
+                    "konfigurační soubor. "
+                    "Chybí " + self.sectionDataFiles + " -> " + k,
+                )
 
     @staticmethod
     def __makePath(pathX):
@@ -307,42 +373,84 @@ class ArgumentsManager(object):
         :returns: Parsované argumenty.
         """
 
-        parser = ExceptionsArgumentParser(description="namegen je program pro generování tvarů jmen osob a lokací.")
+        parser = ExceptionsArgumentParser(
+            description="namegen je program pro generování tvarů jmen osob a lokací."
+        )
 
-        parser.add_argument("-o", "--output", help="Výstupní soubor. Pokud není uvedeno vypisuje na stdout.", type=str,
-                            required=False)
-        parser.add_argument("-ew", "--error-words",
-                            help="Cesta k souboru, kde budou uložena slova, která poskytnutý morfologický analyzátor "
-                                 "nezná. Výsledek je v lntrf formátu s tím, že provádí odhad značko-pravidel pro "
-                                 "ženská a mužská jména.",
-                            type=str)
-        parser.add_argument("-gn", "--given-names",
-                            help="Cesta k souboru, kde budou uložena slova označená jako křestní. Výsledek je v lntrf "
-                                 "formátu.",
-                            type=str)
-        parser.add_argument("-sn", "--surnames",
-                            help="Cesta k souboru, kde budou uložena slova označená jako příjmení. Výsledek je v "
-                                 "lntrf formátu.",
-                            type=str)
-        parser.add_argument("-l", "--locations",
-                            help="Cesta k souboru, kde budou uložena slova označená jako lokace. Výsledek je v lntrf "
-                                 "formátu.",
-                            type=str)
-        parser.add_argument("-in", "--include-no-morphs",
-                            help="Vytiskne i názvy/jména, u kterých se nepodařilo získat tvary, mezi výsledky.",
-                            action='store_true')
-        parser.add_argument("-w", "--whole", help="Na výstupu se budou vyskytovat pouze tvary jmen ve všech pádech.",
-                            action='store_true')
-        parser.add_argument("-v", "--verbose", help="Vypisuje i příslušné derivace jmen/názvů.", action='store_true')
-        parser.add_argument("-d", "--deriv",
-                            help="Roztřídí jména do tříd ekvivalence, na základě relace MÁ STEJNOU DERIVACI, a "
-                                 "vytiskne náhodné reprezentanty (jména) derivací do souboru, který udává tento parametr. Budou zde jen ta jména, která se opravdu generovala.",
-                            type=str, required=False)
-        parser.add_argument("--deriv-stat",
-                            help="Vypíše do souboru statistiky jednotlivých derivací. ",
-                            type=str, required=False)
-        parser.add_argument('input', nargs="?",
-                            help='Vstupní soubor se jmény. Pokud není uvedeno očekává vstup na stdin.', default=None)
+        parser.add_argument(
+            "-o",
+            "--output",
+            help="Výstupní soubor. Pokud není uvedeno vypisuje na stdout.",
+            type=str,
+            required=False,
+        )
+        parser.add_argument(
+            "-ew",
+            "--error-words",
+            help="Cesta k souboru, kde budou uložena slova, která poskytnutý morfologický analyzátor "
+            "nezná. Výsledek je v lntrf formátu s tím, že provádí odhad značko-pravidel pro "
+            "ženská a mužská jména.",
+            type=str,
+        )
+        parser.add_argument(
+            "-gn",
+            "--given-names",
+            help="Cesta k souboru, kde budou uložena slova označená jako křestní. Výsledek je v lntrf "
+            "formátu.",
+            type=str,
+        )
+        parser.add_argument(
+            "-sn",
+            "--surnames",
+            help="Cesta k souboru, kde budou uložena slova označená jako příjmení. Výsledek je v "
+            "lntrf formátu.",
+            type=str,
+        )
+        parser.add_argument(
+            "-l",
+            "--locations",
+            help="Cesta k souboru, kde budou uložena slova označená jako lokace. Výsledek je v lntrf "
+            "formátu.",
+            type=str,
+        )
+        parser.add_argument(
+            "-in",
+            "--include-no-morphs",
+            help="Vytiskne i názvy/jména, u kterých se nepodařilo získat tvary, mezi výsledky.",
+            action="store_true",
+        )
+        parser.add_argument(
+            "-w",
+            "--whole",
+            help="Na výstupu se budou vyskytovat pouze tvary jmen ve všech pádech.",
+            action="store_true",
+        )
+        parser.add_argument(
+            "-v",
+            "--verbose",
+            help="Vypisuje i příslušné derivace jmen/názvů.",
+            action="store_true",
+        )
+        parser.add_argument(
+            "-d",
+            "--deriv",
+            help="Roztřídí jména do tříd ekvivalence, na základě relace MÁ STEJNOU DERIVACI, a "
+            "vytiskne náhodné reprezentanty (jména) derivací do souboru, který udává tento parametr. Budou zde jen ta jména, která se opravdu generovala.",
+            type=str,
+            required=False,
+        )
+        parser.add_argument(
+            "--deriv-stat",
+            help="Vypíše do souboru statistiky jednotlivých derivací. ",
+            type=str,
+            required=False,
+        )
+        parser.add_argument(
+            "input",
+            nargs="?",
+            help="Vstupní soubor se jmény. Pokud není uvedeno očekává vstup na stdin.",
+            default=None,
+        )
         parsed = None
 
         try:
@@ -352,8 +460,11 @@ class ArgumentsManager(object):
             parser.print_help()
             print("\n" + str(e), file=sys.stderr, flush=True)
             Errors.ErrorMessenger.echoError(
-                Errors.ErrorMessenger.getMessage(Errors.ErrorMessenger.CODE_INVALID_ARGUMENTS),
-                Errors.ErrorMessenger.CODE_INVALID_ARGUMENTS)
+                Errors.ErrorMessenger.getMessage(
+                    Errors.ErrorMessenger.CODE_INVALID_ARGUMENTS
+                ),
+                Errors.ErrorMessenger.CODE_INVALID_ARGUMENTS,
+            )
 
         return parsed
 
@@ -392,18 +503,28 @@ def priorityDerivationFilter(aTokens: List[List[namegenPack.Grammar.AnalyzedToke
         # není co filtrovat
         return []
 
-    derivationsLeft = set(x for x in range(len(aTokens)))  # z tohoto setu budeme postupně odebírat
+    derivationsLeft = set(
+        x for x in range(len(aTokens))
+    )  # z tohoto setu budeme postupně odebírat
 
     for iW in range(len(aTokens[0])):
         # pojďme najít maximální prioritu pro aktuální slovo
         maxP = max(
-            aTokens[derivIndex][iW].matchingTerminal.getAttribute(Terminal.Attribute.Type.PRIORITY).value
-            for derivIndex in derivationsLeft)
+            aTokens[derivIndex][iW]
+            .matchingTerminal.getAttribute(Terminal.Attribute.Type.PRIORITY)
+            .value
+            for derivIndex in derivationsLeft
+        )
 
         # odfiltrujeme derivace, které nemají na aktuálním slově maximální prioritu
-        derivationsLeft = set(derivIndex for derivIndex in derivationsLeft
-                              if aTokens[derivIndex][iW].matchingTerminal.getAttribute(
-            Terminal.Attribute.Type.PRIORITY).value >= maxP)
+        derivationsLeft = set(
+            derivIndex
+            for derivIndex in derivationsLeft
+            if aTokens[derivIndex][iW]
+            .matchingTerminal.getAttribute(Terminal.Attribute.Type.PRIORITY)
+            .value
+            >= maxP
+        )
 
         if len(derivationsLeft) <= 1:
             break
@@ -428,7 +549,9 @@ def equGen(names: List[Name], languages: Dict[str, Language]) -> List[Name]:
     for code, lng in languages.items():
         for nameType, eqSets in lng.eqGen.items():
             for eSet in eqSets:
-                interestingWords[code][Name.Type(nameType)] = interestingWords[code][Name.Type(nameType)].union(eSet)
+                interestingWords[code][Name.Type(nameType)] = interestingWords[code][
+                    Name.Type(nameType)
+                ].union(eSet)
 
     generatedNames = []
     for name in names:
@@ -476,21 +599,28 @@ def equGen(names: List[Name], languages: Dict[str, Language]) -> List[Name]:
                 0 B 1 c 2 y
             """
 
-            numberOfVariants = reduce(lambda x, y: x*len(y), newWords, 1)
+            numberOfVariants = reduce(lambda x, y: x * len(y), newWords, 1)
 
             for variantOffset in range(numberOfVariants):
                 lastPeriod = 1  # number of items in a last words period
                 newName = name.copy()
                 for wordsOffset, words in enumerate(newWords):
-                    newName.words[wordsOffset] = Word(words[(variantOffset//lastPeriod) % len(words)], newName, wordsOffset)
+                    newName.words[wordsOffset] = Word(
+                        words[(variantOffset // lastPeriod) % len(words)],
+                        newName,
+                        wordsOffset,
+                    )
                     lastPeriod *= len(words)
                 generatedNames.append(newName)
 
     return generatedNames
 
 
-def gramAnalyzeName(name: Name, tokens: List[Token]) -> \
-        Tuple[List[List[namegenPack.Grammar.Rule]], List[List[namegenPack.Grammar.AnalyzedToken]]]:
+def gramAnalyzeName(
+    name: Name, tokens: List[Token]
+) -> Tuple[
+    List[List[namegenPack.Grammar.Rule]], List[List[namegenPack.Grammar.AnalyzedToken]]
+]:
     """
     Provedou analýzu na základě správné gramatiky, která má být použita pro dané jméno.
 
@@ -511,7 +641,10 @@ def gramAnalyzeName(name: Name, tokens: List[Token]) -> \
     return rules, aTokens
 
 
-def writeDerivStat(writeTo: str, derivClasses: Dict[str, Dict[str, Dict[List[Grammar.Rule], Dict[bool, Set[Name]]]]]):
+def writeDerivStat(
+    writeTo: str,
+    derivClasses: Dict[str, Dict[str, Dict[List[Grammar.Rule], Dict[bool, Set[Name]]]]],
+):
     """
     Vypíše statistiky derivací do souboru.
 
@@ -522,19 +655,49 @@ def writeDerivStat(writeTo: str, derivClasses: Dict[str, Dict[str, Dict[List[Gra
 
     with open(writeTo, "w") as f:
         writer = csv.writer(f, delimiter="\t")
-        writer.writerow(["language", "grammar type", "known words only", "number of names", "representative", "derivative", "name line"])
+        writer.writerow(
+            [
+                "language",
+                "grammar type",
+                "known words only",
+                "number of names",
+                "representative",
+                "derivative",
+                "name line",
+            ]
+        )
         for lang, types in sorted(derivClasses.items(), key=lambda s: s[0]):
             for typeG, allDerivations in sorted(types.items(), key=lambda s: s[0]):
-                for deriv, knownUnknownGroups in sorted(allDerivations.items(), key=lambda d: sum(len(x) for x in d[1].values()), reverse=True):
-                    #iteruje přes derivace, od derivace s největším počtem jmen po nejmenší počet jmen
-                    for unknownFlag in [True, False]:    # True -> všechna slove ve jméne jsou známa
+                for deriv, knownUnknownGroups in sorted(
+                    allDerivations.items(),
+                    key=lambda d: sum(len(x) for x in d[1].values()),
+                    reverse=True,
+                ):
+                    # iteruje přes derivace, od derivace s největším počtem jmen po nejmenší počet jmen
+                    for unknownFlag in [
+                        True,
+                        False,
+                    ]:  # True -> všechna slove ve jméne jsou známa
                         names = knownUnknownGroups[unknownFlag]
                         if len(names) > 0:
                             representative = next(iter(names))
-                            writer.writerow([lang, typeG, unknownFlag, len(names), representative, " | ".join(str(d) for d in deriv), repr(representative)])
+                            writer.writerow(
+                                [
+                                    lang,
+                                    typeG,
+                                    unknownFlag,
+                                    len(names),
+                                    representative,
+                                    " | ".join(str(d) for d in deriv),
+                                    repr(representative),
+                                ]
+                            )
 
 
-def writeDerivRep(writeTo: str, derivClasses: Dict[str, Dict[str, Dict[List[Grammar.Rule], Dict[bool, Set[Name]]]]]):
+def writeDerivRep(
+    writeTo: str,
+    derivClasses: Dict[str, Dict[str, Dict[List[Grammar.Rule], Dict[bool, Set[Name]]]]],
+):
     """
     Vypíše reprezentanty (jména) derivací do souboru.
 
@@ -545,7 +708,15 @@ def writeDerivRep(writeTo: str, derivClasses: Dict[str, Dict[str, Dict[List[Gram
 
     with open(writeTo, "w") as f:
         writer = csv.writer(f, delimiter="\t")
-        writer.writerow(["language", "grammar type", "known words only", "number of names that shares derivation with representative", "class representative"])
+        writer.writerow(
+            [
+                "language",
+                "grammar type",
+                "known words only",
+                "number of names that shares derivation with representative",
+                "class representative",
+            ]
+        )
         # number of names - počet jmen, které sdílý derivaci s reprezentantem
 
         for lang, types in sorted(derivClasses.items(), key=lambda s: s[0]):
@@ -555,7 +726,10 @@ def writeDerivRep(writeTo: str, derivClasses: Dict[str, Dict[str, Dict[List[Gram
                 # analýzu
 
                 selectedNames = {False: set(), True: set()}
-                selectedNamesShared = {False: {}, True: {}}  # každé jméno bude mít zde množinu jmen sdílejících s ním derivaci
+                selectedNamesShared = {
+                    False: {},
+                    True: {},
+                }  # každé jméno bude mít zde množinu jmen sdílejících s ním derivaci
 
                 for deriv, knownUnknownGroups in allDerivations.items():
                     for unknownFlag, names in knownUnknownGroups.items():
@@ -566,7 +740,9 @@ def writeDerivRep(writeTo: str, derivClasses: Dict[str, Dict[str, Dict[List[Gram
                             if len(sharedNames) == 0:
                                 representative = next(iter(names))
                                 selectedNames[unknownFlag].add(representative)
-                                selectedNamesShared[unknownFlag][representative] = names.copy()
+                                selectedNamesShared[unknownFlag][
+                                    representative
+                                ] = names.copy()
 
                             else:
                                 # tato derivace je již pokryta nějakým jménem z selectedNames
@@ -574,8 +750,14 @@ def writeDerivRep(writeTo: str, derivClasses: Dict[str, Dict[str, Dict[List[Gram
                                     selectedNamesShared[unknownFlag][sN] |= names
 
                 for unknownFlag in [True, False]:
-                    for name, sharedNames in sorted(selectedNamesShared[unknownFlag].items(), key=lambda x: len(x[1]), reverse=True):
-                        writer.writerow([lang, typeG, unknownFlag, len(sharedNames), repr(name)])
+                    for name, sharedNames in sorted(
+                        selectedNamesShared[unknownFlag].items(),
+                        key=lambda x: len(x[1]),
+                        reverse=True,
+                    ):
+                        writer.writerow(
+                            [lang, typeG, unknownFlag, len(sharedNames), repr(name)]
+                        )
 
 
 def langLoad(configAll: Dict) -> Dict[str, Language]:
@@ -588,20 +770,28 @@ def langLoad(configAll: Dict) -> Dict[str, Language]:
     """
 
     languages = {}
-    for langFolder in os.listdir(configAll[ConfigManager.sectionDataFiles]["LANGUAGES_DIRECTORY"]):
+    for langFolder in os.listdir(
+        configAll[ConfigManager.sectionDataFiles]["LANGUAGES_DIRECTORY"]
+    ):
 
-        langFolder = os.path.join(configAll[ConfigManager.sectionDataFiles]["LANGUAGES_DIRECTORY"], langFolder)
+        langFolder = os.path.join(
+            configAll[ConfigManager.sectionDataFiles]["LANGUAGES_DIRECTORY"], langFolder
+        )
         if os.path.isdir(langFolder):
             try:
-                lng = Language(langFolder=langFolder,
-                               gFemale=configAll[ConfigManager.sectionDataFiles]["GRAMMAR_FEMALE"],
-                               gMale=configAll[ConfigManager.sectionDataFiles]["GRAMMAR_MALE"],
-                               gLocations=configAll[ConfigManager.sectionDataFiles]["GRAMMAR_LOCATIONS"],
-                               gEvents=configAll[ConfigManager.sectionDataFiles]["GRAMMAR_EVENTS"],
-                               titles=configAll[ConfigManager.sectionDataFiles]["TITLES"],
-                               eqGen=configAll[ConfigManager.sectionDataFiles]["EQ_GEN"],
-                               ma=configAll[ConfigManager.sectionDataFiles]["MA"],
-                               gTimeout=configAll[ConfigManager.sectionGrammar]["TIMEOUT"])
+                lng = Language(
+                    langFolder=langFolder,
+                    gFemale=configAll[ConfigManager.sectionDataFiles]["GRAMMAR_FEMALE"],
+                    gMale=configAll[ConfigManager.sectionDataFiles]["GRAMMAR_MALE"],
+                    gLocations=configAll[ConfigManager.sectionDataFiles][
+                        "GRAMMAR_LOCATIONS"
+                    ],
+                    gEvents=configAll[ConfigManager.sectionDataFiles]["GRAMMAR_EVENTS"],
+                    titles=configAll[ConfigManager.sectionDataFiles]["TITLES"],
+                    eqGen=configAll[ConfigManager.sectionDataFiles]["EQ_GEN"],
+                    ma=configAll[ConfigManager.sectionDataFiles]["MA"],
+                    gTimeout=configAll[ConfigManager.sectionGrammar]["TIMEOUT"],
+                )
 
                 languages[lng.code] = lng
             except Errors.ExceptionMessageCode as e:
@@ -610,7 +800,9 @@ def langLoad(configAll: Dict) -> Dict[str, Language]:
     return languages
 
 
-def initMorphoAnalyzers(allWords: Set[Word], languages: Dict[str, Language], configAll: Dict):
+def initMorphoAnalyzers(
+    allWords: Set[Word], languages: Dict[str, Language], configAll: Dict
+):
     """
     Provede inicializaci morfologických analyzátoru pro dané jazyky.
 
@@ -656,29 +848,39 @@ def prepareNameDependantAnalysys(names: NameReader, languages: Dict[str, Languag
     for code, lang in languages.items():
         lang.ma.prepareNameDependentAnalysis(langNames[code])
 
+
 def main():
     """
     Vstupní bod programu.
     """
     try:
-        logging.basicConfig(stream=sys.stderr, format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
+        logging.basicConfig(
+            stream=sys.stderr,
+            format="%(asctime)s : %(levelname)s : %(message)s",
+            level=logging.INFO,
+        )
         # zpracování argumentů
         args = ArgumentsManager.parseArgs()
 
         # načtení konfigurace
         configManager = ConfigManager()
-        configAll = configManager.read(os.path.dirname(os.path.realpath(__file__)) + '/namegen_config.ini')
+        configAll = configManager.read(
+            os.path.dirname(os.path.realpath(__file__)) + "/namegen_config.ini"
+        )
 
         if configAll[configManager.sectionGrammar]["PARSE_UNKNOWN_ANALYZE"]:
             # nastavní druhů terminálů UNKNOWN_ANALYZE_TERMINAL_MATCH
-            Terminal.UNKNOWN_ANALYZE_TERMINAL_MATCH = configAll[configManager.sectionGrammar][
-                "PARSE_UNKNOWN_ANALYZE_TERMINAL_MATCH"]
+            Terminal.UNKNOWN_ANALYZE_TERMINAL_MATCH = configAll[
+                configManager.sectionGrammar
+            ]["PARSE_UNKNOWN_ANALYZE_TERMINAL_MATCH"]
 
         # get output
         outF = open(args.output, "w") if args.output else sys.stdout
 
         derivClassesOutput = args.deriv
-        derivClasses = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: defaultdict(set))))
+        derivClasses = defaultdict(
+            lambda: defaultdict(lambda: defaultdict(lambda: defaultdict(set)))
+        )
         # derivClasses je dict formátu:
         #   [jazyk][gramatika][derivace][True/False - False jména s neznámou analýzou slova] = množina jmen
 
@@ -687,27 +889,37 @@ def main():
         logging.info("\thotovo")
 
         useLanguages = configAll[configManager.sectionFilters]["LANGUAGES"]
-        if useLanguages  is None:
+        if useLanguages is None:
             # uživatel nezadal žádný filtr, odfiltrujeme tedy jen neznámé jazyky
             useLanguages = set(langCode for langCode in languages)
 
-        namesFilter = NamesFilter(useLanguages,
-                                  configAll[configManager.sectionFilters]["REGEX_NAME"],
-                                  configAll[configManager.sectionFilters]["ALLOWED_ALPHABETIC_CHARACTERS"],
-                                  configAll[configManager.sectionFilters]["SCRIPT"])
+        namesFilter = NamesFilter(
+            useLanguages,
+            configAll[configManager.sectionFilters]["REGEX_NAME"],
+            configAll[configManager.sectionFilters]["ALLOWED_ALPHABETIC_CHARACTERS"],
+            configAll[configManager.sectionFilters]["SCRIPT"],
+        )
 
         # Inicializace generátorů.
         # Je to dělané jako funktor, aby to bylo do budoucna případně snadněji rozšířitelné. Podobně jako filtry.
-        generateNewNames = \
-            GenerateAbbreFormOfPrep(configAll[configManager.sectionGenerators]["ABBRE_FORM_OF_PREPOSITIONS_USE_ON"]) \
-                if configAll[configManager.sectionGenerators]["ABBRE_FORM_OF_PREPOSITIONS"] else GenerateNope()
+        generateNewNames = (
+            GenerateAbbreFormOfPrep(
+                configAll[configManager.sectionGenerators][
+                    "ABBRE_FORM_OF_PREPOSITIONS_USE_ON"
+                ]
+            )
+            if configAll[configManager.sectionGenerators]["ABBRE_FORM_OF_PREPOSITIONS"]
+            else GenerateNope()
+        )
 
         logging.info("čtení jmen")
         # načtení jmen pro zpracování
-        namesR = NameReader(languages=languages,
-                            langDef=configAll[configManager.sectionDataFiles]["DEFAULT_LANGUAGE"],
-                            inputFile=args.input,
-                            shouldSort=False)
+        namesR = NameReader(
+            languages=languages,
+            langDef=configAll[configManager.sectionDataFiles]["DEFAULT_LANGUAGE"],
+            inputFile=args.input,
+            shouldSort=False,
+        )
         logging.info("\thotovo")
 
         logging.info("Filtrace jmen")
@@ -717,7 +929,9 @@ def main():
         logging.info("Rozgenerování ekvivalentních vstupů")
 
         equGenerated = equGen(namesR.names, languages)
-        namesR.names = namesR.names + equGenerated  # must to add it here because of the analyzer
+        namesR.names = (
+            namesR.names + equGenerated
+        )  # must to add it here because of the analyzer
 
         logging.info("\thotovo")
 
@@ -732,7 +946,7 @@ def main():
 
         logging.info("Filtrace rozgenerovaných ekvivalentních vstupů")
 
-        namesR.names = namesR.names[:len(namesR.names)-len(equGenerated)]
+        namesR.names = namesR.names[: len(namesR.names) - len(equGenerated)]
         filterGrammar = NamesGrammarFilter()
 
         for name in equGenerated:
@@ -799,8 +1013,13 @@ def main():
 
             if name.language is None:
                 # neidentifikovaný jazyk
-                print(Errors.ErrorMessenger.getMessage(
-                    Errors.ErrorMessenger.CODE_UNKNOWN_LANGUAGE).format(str(name)), file=sys.stderr, flush=True)
+                print(
+                    Errors.ErrorMessenger.getMessage(
+                        Errors.ErrorMessenger.CODE_UNKNOWN_LANGUAGE
+                    ).format(str(name)),
+                    file=sys.stderr,
+                    flush=True,
+                )
 
                 if args.include_no_morphs:
                     # uživatel chce vytisknout i slova bez tvarů
@@ -812,7 +1031,9 @@ def main():
 
             morphsPrinted = False
 
-            wNoInfo = set()  # Zde budou uložena slova nemající analýzu, která by ji měla mít.
+            wNoInfo = (
+                set()
+            )  # Zde budou uložena slova nemající analýzu, která by ji měla mít.
 
             try:
                 if name in duplicityCheck:
@@ -840,8 +1061,10 @@ def main():
                             wordsMarks = name.simpleWordsTypesGuess(tokens)
                             wNoInfo.add((t.word, wordsMarks[tokenPos]))
 
-                if (configAll[configManager.sectionGrammar]["PARSE_UNKNOWN_ANALYZE"] or len(wNoInfo) == 0) \
-                        and len(wNoInfo) != len(name.words):
+                if (
+                    configAll[configManager.sectionGrammar]["PARSE_UNKNOWN_ANALYZE"]
+                    or len(wNoInfo) == 0
+                ) and len(wNoInfo) != len(name.words):
                     # Nechceme vůbec používat grammatiku na názvy/jména, které obsahují slova, které morfologický
                     # analyzátor nezná nebo jméno/název je složen pouze z takovýchto slov.
 
@@ -854,10 +1077,17 @@ def main():
                     else:
                         rules, aTokens = None, None
 
-                    if name.type == None:  # Používáme rozšířené porovnání implementované v Name.__eq__.
+                    if (
+                        name.type == None
+                    ):  # Používáme rozšířené porovnání implementované v Name.__eq__.
                         # Nemáme dostatečnou informaci o druhu jména, jdeme dál.
-                        print(Errors.ErrorMessenger.getMessage(Errors.ErrorMessenger.CODE_NAME_WITHOUT_TYPE).format(
-                            str(name)), file=sys.stderr, flush=True)
+                        print(
+                            Errors.ErrorMessenger.getMessage(
+                                Errors.ErrorMessenger.CODE_NAME_WITHOUT_TYPE
+                            ).format(str(name)),
+                            file=sys.stderr,
+                            flush=True,
+                        )
                         errorsUnknownNameType += 1
                         if args.include_no_morphs:
                             # uživatel chce vytisknout i slova bez tvarů
@@ -867,7 +1097,9 @@ def main():
                     # získáme aplikovatelná pravidla, ale hlavně analyzované tokeny, které mají v sobě informaci,
                     # zda-li se má dané slovo ohýbat, či nikoliv a další
 
-                    if aTokens is None:  # Nedostaly jsme aTokeny při určování druhu slova?
+                    if (
+                        aTokens is None
+                    ):  # Nedostaly jsme aTokeny při určování druhu slova?
                         # rules a aTokens může obsahovat více než jednu možnou derivaci
                         rules, aTokens = gramAnalyzeName(name, tokens)
 
@@ -875,21 +1107,35 @@ def main():
                     noMorphsWords = set()
                     missingCaseWords = set()
 
-                    if configAll[configManager.sectionDefault]["ALLOW_PRIORITY_FILTRATION"]:
+                    if configAll[configManager.sectionDefault][
+                        "ALLOW_PRIORITY_FILTRATION"
+                    ]:
                         # filtr derivací na základě priorit terminálů
-                        for r in sorted(priorityDerivationFilter(aTokens),
-                                        reverse=True):  # musíme jít od konce, protože se při odstranění mění indexy
+                        for r in sorted(
+                            priorityDerivationFilter(aTokens), reverse=True
+                        ):  # musíme jít od konce, protože se při odstranění mění indexy
                             # odstranění derivací na základě priorit
                             del rules[r]
                             del aTokens[r]
 
-                    alreadyGenerated = set()  # mnozina ntic analyzovanych terminalu, ktere byly jiz generovany
+                    alreadyGenerated = (
+                        set()
+                    )  # mnozina ntic analyzovanych terminalu, ktere byly jiz generovany
 
                     generatedNamesThatShouldBeInDuplicityCheckSet = set()
                     for ru, aT in zip(rules, aTokens):
                         if derivClassesOutput is not None:
-                            #ulož jméno do příslušné třídy na základě derivace
-                            derivClasses[name.language.code][os.path.basename(name.grammar.filePath)][tuple(ru)][all(tmpAT.token.type != Token.Type.ANALYZE_UNKNOWN for tmpAT in aT)].add(name)
+                            # ulož jméno do příslušné třídy na základě derivace
+                            derivClasses[name.language.code][
+                                os.path.basename(name.grammar.filePath)
+                            ][tuple(ru)][
+                                all(
+                                    tmpAT.token.type != Token.Type.ANALYZE_UNKNOWN
+                                    for tmpAT in aT
+                                )
+                            ].add(
+                                name
+                            )
                         aTTuple = tuple(aT)
                         if aTTuple in alreadyGenerated:
                             # Nechceme zpracovávat co jsme již zpracovávali.
@@ -899,7 +1145,9 @@ def main():
                         alreadyGenerated.add(aTTuple)
                         try:
 
-                            if configAll[configManager.sectionGrammar]["PARSE_UNKNOWN_ANALYZE"]:
+                            if configAll[configManager.sectionGrammar][
+                                "PARSE_UNKNOWN_ANALYZE"
+                            ]:
 
                                 for t in aT:
                                     if t.token.type == Token.Type.ANALYZE_UNKNOWN:
@@ -909,15 +1157,25 @@ def main():
                                         # používá se pro výpis chybových slov
 
                                         try:
-                                            errorWords[(name.type,
-                                                        t.matchingTerminal.getAttribute(
-                                                            namegenPack.Grammar.Terminal.Attribute.Type.WORD_TYPE).value,
-                                                        t.token.word)].add((name, len(rules) > 1))
+                                            errorWords[
+                                                (
+                                                    name.type,
+                                                    t.matchingTerminal.getAttribute(
+                                                        namegenPack.Grammar.Terminal.Attribute.Type.WORD_TYPE
+                                                    ).value,
+                                                    t.token.word,
+                                                )
+                                            ].add((name, len(rules) > 1))
                                         except KeyError:
-                                            errorWords[(name.type,
-                                                        t.matchingTerminal.getAttribute(
-                                                            namegenPack.Grammar.Terminal.Attribute.Type.WORD_TYPE).value,
-                                                        t.token.word)] = {(name, len(rules) > 1)}
+                                            errorWords[
+                                                (
+                                                    name.type,
+                                                    t.matchingTerminal.getAttribute(
+                                                        namegenPack.Grammar.Terminal.Attribute.Type.WORD_TYPE
+                                                    ).value,
+                                                    t.token.word,
+                                                )
+                                            ] = {(name, len(rules) > 1)}
 
                             # Získáme tvary a pokud budou pro nějaké slovo problémy, při získání tvarů, tak si necháme
                             # uložit korespondující token ke slovo do množiny missingCaseWords (společně s problémovým
@@ -925,7 +1183,9 @@ def main():
                             morphs = name.genMorphs(aT, missingCaseWords)
 
                             if args.whole and (
-                                    (name.grammar.flexible and len(morphs) < len(Case)) or (not name.grammar.flexible and len(morphs) < 1)):
+                                (name.grammar.flexible and len(morphs) < len(Case))
+                                or (not name.grammar.flexible and len(morphs) < 1)
+                            ):
                                 # Uživatel chce tisknout pouze pokud máme tvary pro všechny pády.
                                 continue
 
@@ -936,21 +1196,35 @@ def main():
 
                             for genName, genNameMorphs in generatedNames:
                                 if genName not in duplicityCheck:
-                                    generatedNamesNotDuplicit.append((genName, genNameMorphs))
+                                    generatedNamesNotDuplicit.append(
+                                        (genName, genNameMorphs)
+                                    )
 
                                     # Přidáme nově vygenerovaná jména, abychom je znovu nemuseli případně dále procházet.
-                                    generatedNamesThatShouldBeInDuplicityCheckSet.add(genName)
+                                    generatedNamesThatShouldBeInDuplicityCheckSet.add(
+                                        genName
+                                    )
 
                             generatedNames = generatedNamesNotDuplicit
 
                             # vypíšeme všechna jména (generovaná + původní jméno)
-                            for nameToWrite, morphsToWrite in [(name, morphs)] + generatedNames:
+                            for nameToWrite, morphsToWrite in [
+                                (name, morphs)
+                            ] + generatedNames:
 
-                                resAdd = str(nameToWrite) + "\t" + str(nameToWrite.language.code) + "\t" + str(
-                                    nameToWrite.type) + "\t" + (
-                                             "|".join(str(m) for m in morphsToWrite))
+                                resAdd = (
+                                    str(nameToWrite)
+                                    + "\t"
+                                    + str(nameToWrite.language.code)
+                                    + "\t"
+                                    + str(nameToWrite.type)
+                                    + "\t"
+                                    + ("|".join(str(m) for m in morphsToWrite))
+                                )
                                 if len(nameToWrite.additionalInfo) > 0:
-                                    resAdd += "\t" + ("\t".join(nameToWrite.additionalInfo))
+                                    resAdd += "\t" + (
+                                        "\t".join(nameToWrite.additionalInfo)
+                                    )
                                 completedMorphs.add(resAdd)
                                 if args.verbose:
                                     logging.info(str(nameToWrite) + "\tDerivace:")
@@ -959,7 +1233,12 @@ def main():
                                     logging.info("\tTerminály:")
                                     for a in aT:
                                         if a.token.word is not None:
-                                            logging.info("\t\t" + str(a.token.word) + "\t" + str(a.matchingTerminal))
+                                            logging.info(
+                                                "\t\t"
+                                                + str(a.token.word)
+                                                + "\t"
+                                                + str(a.matchingTerminal)
+                                            )
 
                         except Word.WordNoMorphsException as e:
                             # chyba při generování tvarů slova
@@ -975,15 +1254,35 @@ def main():
                         # chyba při generování tvarů jména
 
                         if len(noMorphsWords) > 0:
-                            print(Errors.ErrorMessenger.getMessage(
-                                Errors.ErrorMessenger.CODE_NAME_NO_MORPHS_GENERATED).format(str(name), ", ".join(
-                                str(w) + " " + str(m) for m, w in noMorphsWords)), file=sys.stderr, flush=True)
+                            print(
+                                Errors.ErrorMessenger.getMessage(
+                                    Errors.ErrorMessenger.CODE_NAME_NO_MORPHS_GENERATED
+                                ).format(
+                                    str(name),
+                                    ", ".join(
+                                        str(w) + " " + str(m) for m, w in noMorphsWords
+                                    ),
+                                ),
+                                file=sys.stderr,
+                                flush=True,
+                            )
 
                         for aTerm, c in missingCaseWords:
-                            print(str(name) + "\t" + Errors.ErrorMessenger.getMessage(
-                                Errors.ErrorMessenger.CODE_WORD_MISSING_MORF_FOR_CASE) + "\t" + str(
-                                c.value) + "\t" + str(
-                                aTerm.token.word) + "\t" + str(aTerm.matchingTerminal), file=sys.stderr, flush=True)
+                            print(
+                                str(name)
+                                + "\t"
+                                + Errors.ErrorMessenger.getMessage(
+                                    Errors.ErrorMessenger.CODE_WORD_MISSING_MORF_FOR_CASE
+                                )
+                                + "\t"
+                                + str(c.value)
+                                + "\t"
+                                + str(aTerm.token.word)
+                                + "\t"
+                                + str(aTerm.matchingTerminal),
+                                file=sys.stderr,
+                                flush=True,
+                            )
 
                     # vytiskneme
                     for m in completedMorphs:
@@ -1004,11 +1303,17 @@ def main():
                         # sjednotíme všechny derivace
                         for aT in aTokens:
                             # pouze známá
-                            aTokensKnown = [aTok for aTok in aT if aTok.token.type != Token.Type.ANALYZE_UNKNOWN]
+                            aTokensKnown = [
+                                aTok
+                                for aTok in aT
+                                if aTok.token.type != Token.Type.ANALYZE_UNKNOWN
+                            ]
 
                             for w, rules in Name.getWordsOfType(wordType, aTokensKnown):
                                 try:
-                                    wordRules[wordType][str(w)] = wordRules[wordType][str(w)] | rules
+                                    wordRules[wordType][str(w)] = (
+                                        wordRules[wordType][str(w)] | rules
+                                    )
                                 except KeyError:
                                     wordRules[wordType][str(w)] = rules
                 else:
@@ -1021,7 +1326,11 @@ def main():
             except namegenPack.Grammar.Grammar.TimeoutException as e:
                 # Při provádění syntaktické analýzy, nad aktuálním jménem, došlo k timeoutu.
                 errorsTimout += 1
-                print(e.message + "\t" + str(name) + "\t" + str(name.type), file=sys.stderr, flush=True)
+                print(
+                    e.message + "\t" + str(name) + "\t" + str(name.type),
+                    file=sys.stderr,
+                    flush=True,
+                )
 
             except Word.WordException as e:
                 if isinstance(e, Word.WordCouldntGetInfoException):
@@ -1030,9 +1339,17 @@ def main():
 
             except namegenPack.Grammar.Grammar.NotInLanguage:
                 errorsGrammerCnt += 1
-                print(Errors.ErrorMessenger.getMessage(
-                    Errors.ErrorMessenger.CODE_NAME_IS_NOT_IN_LANGUAGE_GENERATED_WITH_GRAMMAR) +
-                      "\t" + str(name) + "\t" + str(name.type), file=sys.stderr, flush=True)
+                print(
+                    Errors.ErrorMessenger.getMessage(
+                        Errors.ErrorMessenger.CODE_NAME_IS_NOT_IN_LANGUAGE_GENERATED_WITH_GRAMMAR
+                    )
+                    + "\t"
+                    + str(name)
+                    + "\t"
+                    + str(name.type),
+                    file=sys.stderr,
+                    flush=True,
+                )
 
             except Errors.ExceptionMessageCode as e:
                 # chyba při zpracování slova
@@ -1040,10 +1357,17 @@ def main():
                 print(str(name) + "\t" + e.message, file=sys.stderr, flush=True)
 
             if len(wNoInfo) > 0:
-                print(str(name) + "\t" + Errors.ErrorMessenger.getMessage(
-                    Errors.ErrorMessenger.CODE_WORD_ANALYZE) + "\t" + (
-                          ", ".join(str(w) for w, _ in wNoInfo)),
-                      file=sys.stderr, flush=True)
+                print(
+                    str(name)
+                    + "\t"
+                    + Errors.ErrorMessenger.getMessage(
+                        Errors.ErrorMessenger.CODE_WORD_ANALYZE
+                    )
+                    + "\t"
+                    + (", ".join(str(w) for w, _ in wNoInfo)),
+                    file=sys.stderr,
+                    flush=True,
+                )
 
             if args.include_no_morphs and not morphsPrinted:
                 # uživatel chce vytisknout i slova bez tvarů
@@ -1066,8 +1390,14 @@ def main():
             with open(pathToWrite, "w") as fileW:
                 for w, rules in wordRules[wordType].items():
                     print(
-                        str(w) + "\t" + "j" + str(wordType) + "\t" + (" ".join(sorted(r.lntrf + "::" for r in rules))),
-                        file=fileW)
+                        str(w)
+                        + "\t"
+                        + "j"
+                        + str(wordType)
+                        + "\t"
+                        + (" ".join(sorted(r.lntrf + "::" for r in rules))),
+                        file=fileW,
+                    )
             logging.info("\thotovo")
 
         if args.deriv_stat is not None:
@@ -1083,13 +1413,19 @@ def main():
             logging.info("\thotovo")
 
         print("-------------------------", file=sys.stderr)
-        print("Celkem jmen: " + str(namesR.errorCnt + len(namesR.names)), file=sys.stderr)
+        print(
+            "Celkem jmen: " + str(namesR.errorCnt + len(namesR.names)), file=sys.stderr
+        )
         print("\tNenačtených jmen: " + str(namesR.errorCnt), file=sys.stderr)
         print("\tDuplicitních jmen: " + str(errorsDuplicity), file=sys.stderr)
         print("\tNačtených jmen/názvů celkem: ", len(namesR.names), file=sys.stderr)
-        print("\tPrůměrný čas strávený nad generováním tvarů jednoho jména/názvu: ",
-              round((endOfGenMorp - startOfGenMorp) / len(namesR.names), 3) if len(namesR.names) > 0 else 0,
-              file=sys.stderr)
+        print(
+            "\tPrůměrný čas strávený nad generováním tvarů jednoho jména/názvu: ",
+            round((endOfGenMorp - startOfGenMorp) / len(namesR.names), 3)
+            if len(namesR.names) > 0
+            else 0,
+            file=sys.stderr,
+        )
 
         for lngCode, lng in languages.items():
             grammarFemale = lng.gFemale
@@ -1098,43 +1434,106 @@ def main():
             grammarEvents = lng.gEvents
 
             print(f"\tJazyk {lngCode}", file=sys.stderr)
-            print("\t\tPrůměrný čas strávený nad jednou syntaktickou analýzou napříč gramatikami:",
-                  (
-                          grammarFemale.grammarEllapsedTime + grammarLocations.grammarEllapsedTime + grammarEvents.grammarEllapsedTime + grammarMale.grammarEllapsedTime) / (
-                          grammarFemale.grammarNumOfAnalyzes + grammarMale.grammarNumOfAnalyzes + grammarLocations.grammarNumOfAnalyzes + grammarEvents.grammarNumOfAnalyzes)
-                  if (
-                             grammarFemale.grammarNumOfAnalyzes + grammarMale.grammarNumOfAnalyzes + grammarLocations.grammarNumOfAnalyzes + grammarEvents.grammarNumOfAnalyzes) > 0 else 0,
-                  file=sys.stderr)
+            print(
+                "\t\tPrůměrný čas strávený nad jednou syntaktickou analýzou napříč gramatikami:",
+                (
+                    grammarFemale.grammarEllapsedTime
+                    + grammarLocations.grammarEllapsedTime
+                    + grammarEvents.grammarEllapsedTime
+                    + grammarMale.grammarEllapsedTime
+                )
+                / (
+                    grammarFemale.grammarNumOfAnalyzes
+                    + grammarMale.grammarNumOfAnalyzes
+                    + grammarLocations.grammarNumOfAnalyzes
+                    + grammarEvents.grammarNumOfAnalyzes
+                )
+                if (
+                    grammarFemale.grammarNumOfAnalyzes
+                    + grammarMale.grammarNumOfAnalyzes
+                    + grammarLocations.grammarNumOfAnalyzes
+                    + grammarEvents.grammarNumOfAnalyzes
+                )
+                > 0
+                else 0,
+                file=sys.stderr,
+            )
             print("\t\t\t FEMALE", file=sys.stderr)
-            print("\t\t\t\t Průměrný čas strávený nad jednou syntaktickou analýzou:",
-                  grammarFemale.grammarEllapsedTime / grammarFemale.grammarNumOfAnalyzes if grammarFemale.grammarNumOfAnalyzes > 0 else 0,
-                  file=sys.stderr)
-            print("\t\t\t\t Počet analýz:", grammarFemale.grammarNumOfAnalyzes, file=sys.stderr)
+            print(
+                "\t\t\t\t Průměrný čas strávený nad jednou syntaktickou analýzou:",
+                grammarFemale.grammarEllapsedTime / grammarFemale.grammarNumOfAnalyzes
+                if grammarFemale.grammarNumOfAnalyzes > 0
+                else 0,
+                file=sys.stderr,
+            )
+            print(
+                "\t\t\t\t Počet analýz:",
+                grammarFemale.grammarNumOfAnalyzes,
+                file=sys.stderr,
+            )
             print("\t\t\t MALE", file=sys.stderr)
-            print("\t\t\t\t Průměrný čas strávený nad jednou syntaktickou analýzou:",
-                  grammarMale.grammarEllapsedTime / grammarMale.grammarNumOfAnalyzes if grammarMale.grammarNumOfAnalyzes > 0 else 0,
-                  file=sys.stderr)
-            print("\t\t\t\t Počet analýz:", grammarMale.grammarNumOfAnalyzes, file=sys.stderr)
+            print(
+                "\t\t\t\t Průměrný čas strávený nad jednou syntaktickou analýzou:",
+                grammarMale.grammarEllapsedTime / grammarMale.grammarNumOfAnalyzes
+                if grammarMale.grammarNumOfAnalyzes > 0
+                else 0,
+                file=sys.stderr,
+            )
+            print(
+                "\t\t\t\t Počet analýz:",
+                grammarMale.grammarNumOfAnalyzes,
+                file=sys.stderr,
+            )
             print("\t\t\t LOCATION", file=sys.stderr)
-            print("\t\t\t\t Průměrný čas strávený nad jednou syntaktickou analýzou:",
-                  grammarLocations.grammarEllapsedTime / grammarLocations.grammarNumOfAnalyzes if grammarLocations.grammarNumOfAnalyzes > 0 else 0,
-                  file=sys.stderr)
-            print("\t\t\t\t Počet analýz:", grammarLocations.grammarNumOfAnalyzes, file=sys.stderr)
+            print(
+                "\t\t\t\t Průměrný čas strávený nad jednou syntaktickou analýzou:",
+                grammarLocations.grammarEllapsedTime
+                / grammarLocations.grammarNumOfAnalyzes
+                if grammarLocations.grammarNumOfAnalyzes > 0
+                else 0,
+                file=sys.stderr,
+            )
+            print(
+                "\t\t\t\t Počet analýz:",
+                grammarLocations.grammarNumOfAnalyzes,
+                file=sys.stderr,
+            )
             print("\t\t\t EVENTS", file=sys.stderr)
-            print("\t\t\t\t Průměrný čas strávený nad jednou syntaktickou analýzou:",
-                  grammarEvents.grammarEllapsedTime / grammarEvents.grammarNumOfAnalyzes if grammarEvents.grammarNumOfAnalyzes > 0 else 0,
-                  file=sys.stderr)
-            print("\t\t\t\t Počet analýz:", grammarEvents.grammarNumOfAnalyzes, file=sys.stderr)
+            print(
+                "\t\t\t\t Průměrný čas strávený nad jednou syntaktickou analýzou:",
+                grammarEvents.grammarEllapsedTime / grammarEvents.grammarNumOfAnalyzes
+                if grammarEvents.grammarNumOfAnalyzes > 0
+                else 0,
+                file=sys.stderr,
+            )
+            print(
+                "\t\t\t\t Počet analýz:",
+                grammarEvents.grammarNumOfAnalyzes,
+                file=sys.stderr,
+            )
             print("\t\tNeznámý druh jména:", errorsUnknownNameType, file=sys.stderr)
             print("\t\tNepokryto gramatikou:", errorsGrammerCnt, file=sys.stderr)
-            print("\t\tPočet jmen, u kterých došlo k timeoutu při syntaktické analýze:", errorsTimout, file=sys.stderr)
-            print("\t\tPočet slov, které poskytnutý morfologický analyzátor nezná:",
-                  len(set(w for (_, _, w), _ in errorWords.items())), file=sys.stderr)
+            print(
+                "\t\tPočet jmen, u kterých došlo k timeoutu při syntaktické analýze:",
+                errorsTimout,
+                file=sys.stderr,
+            )
+            print(
+                "\t\tPočet slov, které poskytnutý morfologický analyzátor nezná:",
+                len(set(w for (_, _, w), _ in errorWords.items())),
+                file=sys.stderr,
+            )
 
             if errorWordsShouldSave:
                 # save words with errors into a file
                 with open(args.error_words, "w") as errWFile:
-                    for (nT, m, w), names in errorWords.items():  # druh názvu (mužský, ženský, lokace),označení typu slova ve
+                    for (
+                        nT,
+                        m,
+                        w,
+                    ), names in (
+                        errorWords.items()
+                    ):  # druh názvu (mužský, ženský, lokace),označení typu slova ve
                         # jméně(jméno, příjmení), společně se jménem
                         # u ženských a mužských jmen přidáme odhad lntrf značky
                         resultStr = str(w) + "\t" + str(m)
@@ -1144,9 +1543,20 @@ def main():
                             if nT == Name.Type.PersonGender.MALE:
                                 resultStr += "\tk1gMnSc1::"
                         # přidáme jména/názvy kde se problém vyskytl
-                        resultStr += "\t" + str(nT) + "\t@\t" + "\t".join(
-                            str(name) + ("\t" + name.additionalInfo[0] if len(name.additionalInfo) > 0 else "")
-                            for name, _ in names)  # name.additionalInfo by mělo na první pozici obsahovat URL zdroje
+                        resultStr += (
+                            "\t"
+                            + str(nT)
+                            + "\t@\t"
+                            + "\t".join(
+                                str(name)
+                                + (
+                                    "\t" + name.additionalInfo[0]
+                                    if len(name.additionalInfo) > 0
+                                    else ""
+                                )
+                                for name, _ in names
+                            )
+                        )  # name.additionalInfo by mělo na první pozici obsahovat URL zdroje
                         resultStr += f"\t{'all names have multiple derivations' if all(multi_deriv for _, multi_deriv in names) else ''} "
                         print(resultStr, file=errWFile)
 
@@ -1155,8 +1565,13 @@ def main():
         traceback.print_tb(e.__traceback__)
     except IOError as e:
         Errors.ErrorMessenger.echoError(
-            Errors.ErrorMessenger.getMessage(Errors.ErrorMessenger.CODE_COULDNT_WORK_WITH_FILE) + "\n" + str(e),
-            Errors.ErrorMessenger.CODE_COULDNT_WORK_WITH_FILE)
+            Errors.ErrorMessenger.getMessage(
+                Errors.ErrorMessenger.CODE_COULDNT_WORK_WITH_FILE
+            )
+            + "\n"
+            + str(e),
+            Errors.ErrorMessenger.CODE_COULDNT_WORK_WITH_FILE,
+        )
         traceback.print_tb(e.__traceback__)
 
     except Exception as e:
@@ -1165,11 +1580,13 @@ def main():
         traceback.print_tb(e.__traceback__)
 
         print("--------------------", file=sys.stderr)
-        print("Text: ", end='', file=sys.stderr)
+        print("Text: ", end="", file=sys.stderr)
         print(e, file=sys.stderr)
         print("--------------------", file=sys.stderr)
-        Errors.ErrorMessenger.echoError(Errors.ErrorMessenger.getMessage(Errors.ErrorMessenger.CODE_UNKNOWN_ERROR),
-                                        Errors.ErrorMessenger.CODE_UNKNOWN_ERROR)
+        Errors.ErrorMessenger.echoError(
+            Errors.ErrorMessenger.getMessage(Errors.ErrorMessenger.CODE_UNKNOWN_ERROR),
+            Errors.ErrorMessenger.CODE_UNKNOWN_ERROR,
+        )
 
 
 if __name__ == "__main__":
