@@ -3,6 +3,16 @@
 Účelem nástroje kb_aliases_cleaner je vyčistit znalostní bázi od mnohočetných jednoslovných aliasů.
 Více informací lze nalézt na interní wiki stránce: [Ner bug fixing](https://knot.fit.vutbr.cz/wiki/index.php/Ner_bug_fixing#Odstran.C4.9Bn.C3.AD_jednoslovn.C3.BDch_alias.C5.AF_.28xkrizd03.290=)
 
+Instalace
+---------
+Je nutné nainstalovat `src/kb` jako python balíček pomocí příkazu:
+
+    pip install src/kb
+
+Dále je potřeba inicializovat git submoduly pomocí:
+
+    git submodule init --update
+
 Spuštění
 --------
 	./start.sh [options]
