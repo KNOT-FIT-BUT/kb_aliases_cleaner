@@ -1,0 +1,12 @@
+VERSION=cs_20210920-1634073825
+<__generic__>ID	TYPE	NAME	DISAMBIGUATION NAME	{m}ALIASES	DESCRIPTION	{m}ROLES	FICTIONAL	{u}WIKIPEDIA URL	{u}WIKIDATA URL	{u}DBPEDIA URL	{gm[http://athena3.fit.vutbr.cz/kb/images/]}IMAGES
+<person>GENDER	{e}DATE OF BIRTH	PLACE OF BIRTH	{e}DATE OF DEATH	PLACE OF DEATH	{m}NATIONALITIES
+<group>{m}INDIVIDUAL NAMES	{m}GENDERS	{me}DATES OF BIRTH	{m}PLACES OF BIRTH	{me}DATES OF DEATH	{m}PLACES OF DEATH	{m}NATIONALITIES
+<artist>{m}ART FORMS	{m}INFLUENCERS	{m}INFLUENCEES	ULAN ID	{mu}OTHER URLS
+<geographical>LATITUDE	LONGITUDE	{m}GEOTYPES	COUNTRY	POPULATION	ELEVATION	AREA	{m}TIMEZONES	FEATURE CODE	{m}GEONAMES IDS
+<__stats__>WIKI BACKLINKS	WIKI HITS	WIKI PRIMARY SENSE	SCORE WIKI	SCORE METRICS	CONFIDENCE
+
+abcedefghi	person	Jan Novák	Jan Novák   Jan#mark=delete	Test Name Description	0	0 wiki-url	wikidata-url	dbpedia-url	images	M	1000-1-1	birth-place	death-place	nationality
+abcedefghj	person	Jan Novák	Jan Novák 	Jan#mark=delete	Test Name Description	0	0 wiki-url	wikidata-url	dbpedia-url	images	M	1000-1-1	birth-place	death-place	nationality
+abcedefghk	person	Jan Novák	Jan Novák 	Jan#mark=delete Test Name Description	0	0 wiki-url	wikidata-url	dbpedia-url	images	M	1000-1-1	birth-place	death-place	nationality
+
