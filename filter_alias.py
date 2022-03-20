@@ -41,7 +41,7 @@ if __name__ == "__main__":
     ROOTDIR = os.path.dirname(os.path.realpath(__file__))
 
     parser = ArgumentParser(
-        "filter_alias is a script that filters problematic aliases from the KB"
+        description="Filters problematic aliases from the KB"
     )
     parser.add_argument(
         "--destroy",
