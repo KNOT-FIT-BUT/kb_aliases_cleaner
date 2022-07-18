@@ -233,6 +233,8 @@ def find_problematic_aliases(filename, alias_dict):
             knowledge_base_content[toc_kb_data:], start=toc_kb_data + 1
         ):
             line = line.split("\t")
+            if len(line) == 1:
+                continue;
             line[POS_MATCH_LINE] = str(idx)
             if line[POS_TYPE] != "person":
                 continue
