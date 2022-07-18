@@ -77,13 +77,13 @@ if __name__ == "__main__":
     )
     args = vars(parser.parse_args())
 
-    match_alias.find_problematic_aliases(args["output_file"], alias_dict)
+    match_alias.find_problematic_aliases(args["input_file"], alias_dict)
 
     aliases = set(alias_dict.keys())
     aliases_to_remove = match_alias.find_odd_aliases(aliases)
     aliases.symmetric_difference_update(aliases_to_remove)
 
-    match_alias.match_aliases(args["output_file"], aliases, alias_dict, match_dict)
+    match_alias.match_aliases(args["input_file"], aliases, alias_dict, match_dict)
     match_alias.remove_useless_matches(alias_dict, match_dict, args["threshold"])
 
     if args["debug"] == True:
