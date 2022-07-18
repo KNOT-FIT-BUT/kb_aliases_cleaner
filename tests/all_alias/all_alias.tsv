@@ -6,9 +6,9 @@ VERSION=cs_20210920-1634073825
 <geographical>LATITUDE	LONGITUDE	{m}GEOTYPES	COUNTRY	POPULATION	ELEVATION	AREA	{m}TIMEZONES	FEATURE CODE	{m}GEONAMES IDS
 <__stats__>WIKI BACKLINKS	WIKI HITS	WIKI PRIMARY SENSE	SCORE WIKI	SCORE METRICS	CONFIDENCE
 
-abcedefghi	person	Jan Novák	Jan Novák   Jan	Test Name Description	0	0 wiki-url	wikidata-url	dbpedia-url	images	M	1000-1-1	birth-place	death-place	nationality
-abcedefghj	person	Jan Novák	Jan Novák 	Jan	Test Name Description	0	0 wiki-url	wikidata-url	dbpedia-url	images	M	1000-1-1	birth-place	death-place	nationality
-abcedefghk	person	Jan Novák	Jan Novák 	Jan Test Name Description	0	0 wiki-url	wikidata-url	dbpedia-url	images	M	1000-1-1	birth-place	death-place	nationality
-abcedefghl	person	Jan Novák	Jan Novák 	Honza	Test Name Description	0	0 wiki-url	wikidata-url	dbpedia-url	images	M	1000-1-1	birth-place	death-place	nationality
-abcedefghm	person	Jan Novák	Jan Novák 	Honza	Test Name Description	0	0 wiki-url	wikidata-url	dbpedia-url	images	M	1000-1-1	birth-place	death-place	nationality
-abcedefghn	person	Jan Novák	Jan Novák 	Honza	Test Name Description	0	0 wiki-url	wikidata-url	dbpedia-url	images	M	1000-1-1	birth-place	death-place	nationality
+abcedefghi	person	Jan Novák	Jan Novák	Jan	Test Name Description	0	0	wiki-url	wikidata-url	dbpedia-url	images	M	1000-1-1	birth-place	death-place	nationality
+abcedefghj	person	Jan Novák	Jan Novák 	Jan	Test Name Description	0	0 	wiki-url	wikidata-url	dbpedia-url	images	M	1000-1-1	birth-place	death-place	nationality
+abcedefghk	person	Jan Novák	Jan Novák 	Jan	Test Name Description	0	0 	wiki-url	wikidata-url	dbpedia-url	images	M	1000-1-1	birth-place	death-place	nationality
+abcedefghl	person	Jan Novák	Jan Novák 	Honza	Test Name Description	0	0 	wiki-url	wikidata-url	dbpedia-url	images	M	1000-1-1	birth-place	death-place	nationality
+abcedefghm	person	Jan Novák	Jan Novák 	Honza	Test Name Description	0	0 	wiki-url	wikidata-url	dbpedia-url	images	M	1000-1-1	birth-place	death-place	nationality
+abcedefghn	person	Jan Novák	Jan Novák 	Honza	Test Name Description	0	0 	wiki-url	wikidata-url	dbpedia-url	images	M	1000-1-1	birth-place	death-place	nationality
