@@ -10,20 +10,21 @@ do
     touch $out
 
    # ./start.sh --input-file "$test_case.tsv" --output-file "$out"
+    ./start.sh "$(cat $test_case.flags)" --input-file "$test_case.tsv" --output-file "$out" > /dev/null 2> /dev/null
 
     if ! [ "$?" = "$(cat $test_case.rc)" ]
     then 
-        printf "[\e[31mFAIL\e[0m] %s\n" "$name"
+        printf "[\e[31mFAIL\e[0m] %s\n" "$name" ": Wrong exit code"
         rm -f "$out"
-        exit 1
+        continue;
     fi
 
 
-    if ! [ "$(cat "$out")" = "$(cat "$test_case.out")" ]
+    if ! [ "$(cat "$out" | xargs)" = "$(cat "$test_case.out" | xargs)" ]
     then 
-        printf "[\e[31mFAIL\e[0m] %s\n" "$name"
+        printf "[\e[31mFAIL\e[0m] %s\n" "$name" ": Output does not match"
         rm -f "$out"
-        exit 1
+        continue
     fi
 
     printf "[\e[32mPASS\e[0m] %s\n" "$name"
