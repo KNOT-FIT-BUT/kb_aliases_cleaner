@@ -80,11 +80,28 @@ if __name__ == "__main__":
     match_alias.find_problematic_aliases(args["input_file"], alias_dict)
 
     aliases = set(alias_dict.keys())
+    if not aliases:
+        print("[!] No aliases found")
+        with open(args["input_file"], "r") as KB_in:
+            KB_lines = KB_in.readlines()
+            with open(args["output_file"], "w") as KB_out:
+                for line in KB_lines:
+                    KB_out.write(line)
+        sys.exit(0)
+
     aliases_to_remove = match_alias.find_odd_aliases(aliases)
     aliases.symmetric_difference_update(aliases_to_remove)
 
     match_alias.match_aliases(args["input_file"], aliases, alias_dict, match_dict)
     match_alias.remove_useless_matches(alias_dict, match_dict, args["threshold"])
+    if not alias_dict:
+        print("[!] No aliases found")
+        with open(args["input_file"], "r") as KB_in:
+            KB_lines = KB_in.readlines()
+            with open(args["output_file"], "w") as KB_out:
+                for line in KB_lines:
+                    KB_out.write(line)
+        sys.exit(0)
 
     if args["debug"] == True:
         match_alias.write_numbered_aliases("num_aliases.tsv", alias_dict)
