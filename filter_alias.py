@@ -115,7 +115,15 @@ if __name__ == "__main__":
     for key in alias_dict:
         names = str(alias_dict[key]).split("\t")[2]
         for name in names.split("|"):
-            name, gender = name.split("#")
+            try:
+                name, gender = name.split("#")
+            except ValueError:
+                if not name and not gender:
+                    print("[!] Empty name and gender encountered in KB")
+                elif not name:
+                    print("[!] Empty name encountered with gender: {gender}")
+                elif not gender:
+                    print(f"[!] No gender found for name: {name}")
             namegen_str = name + "\t\t" + "P:::" + gender + "\n"
             namegen_input.append(namegen_str)
 
