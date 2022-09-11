@@ -139,7 +139,7 @@ def get_kb_head_positions(kb_filename="KB.tsv"):
             elif STATS_REGEX.match(line[0]):
                 process_kb_head_line(line, kb_header, "stats", generic_type_len)
             else:
-                raise (
+                raise Exception(
                     "error: new kind of KB Type encountered, please update\
                       this script"
                 )
