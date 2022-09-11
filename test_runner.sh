@@ -9,8 +9,7 @@ do
     test_case="tests/$test_case/$test_case"
     touch $out
 
-   # ./start.sh --input-file "$test_case.tsv" --output-file "$out"
-    ./start.sh "$(cat $test_case.flags)" --input-file "$test_case.tsv" --output-file "$out" > /dev/null 2> /dev/null
+    ./start.sh "$(cat $test_case.flags)" --input-file "$test_case.tsv" --output-file "$out"
 
     if ! [ "$?" = "$(cat $test_case.rc)" ]
     then 
@@ -24,7 +23,7 @@ do
     then 
         printf "[\e[31mFAIL\e[0m] %s\n" "$name" ": Output does not match"
         rm -f "$out"
-        continue
+        continue;
     fi
 
     printf "[\e[32mPASS\e[0m] %s\n" "$name"
