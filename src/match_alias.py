@@ -98,6 +98,7 @@ def match_aliases(filename, aliases, aliases_dict, match_dict):
     in corresponding dictionaries"""
     with open(filename) as knowledge_base:
         knowledge_base_content = knowledge_base.readlines()
+        knowledge_base_content = list(filter(None, knowledge_base_content))
         toc_kb_data = kb.get_toc_kb_data(kb_content=knowledge_base_content)
         for idx, line in enumerate(
             knowledge_base_content[toc_kb_data:], start=toc_kb_data + 1

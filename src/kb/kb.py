@@ -40,24 +40,24 @@ def get_kb_toc(kb_content: list) -> [int, int, int, int, int]:
         sys.exit("Too short KB content.")
 
     for idx, line in enumerate(kb_content):
-        if line == "\n":
-            if toc_kb_resources_versions and toc_kb_tools_versions:
-                if toc_kb_head:
-                    toc_kb_data = idx + 1
-                    break
-                else:
-                    toc_kb_head = idx + 1
-            else:
-                toc_kb_head = 1
-                toc_kb_data = idx + 1
-                break
-    return [
+        if line == '\n':
+            toc_kb_head = idx + 1
+            break
+
+    for idx, line in enumerate(kb_content[toc_kb_head:], start=toc_kb_head):
+        if line != "\n":
+            toc_kb_data = idx
+            break
+
+
+    retval = [
         toc_kb_version,
         toc_kb_resources_versions,
         toc_kb_tools_versions,
         toc_kb_head,
         toc_kb_data,
     ]
+    return retval
 
 
 def get_toc_kb_data(kb_content: list) -> int:
@@ -116,7 +116,9 @@ def get_kb_head_positions(kb_filename="KB.tsv"):
         kb_header = {}
         generic_type_len: int = 0
         lines = kb_file.readlines()
-        for line in lines[get_kb_toc(lines)[TOC_KB_HEAD_POS] :]:
+        TOC_KB_DATA_POS = 4
+        kb_head_pos = get_kb_toc(lines)[TOC_KB_HEAD_POS]
+        for line in lines[1:kb_head_pos]:
             if not line.strip():
                 break
             line = line.strip().split("\t")
