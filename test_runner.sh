@@ -15,7 +15,7 @@ do
     then 
         printf "[\e[31mFAIL\e[0m] %s\n" "$name" ": Wrong exit code"
         rm -f "$out"
-        continue;
+        continue
     fi
 
 
@@ -23,7 +23,7 @@ do
     then 
         printf "[\e[31mFAIL\e[0m] %s\n" "$name" ": Output does not match"
         rm -f "$out"
-        continue;
+        continue
     fi
 
     printf "[\e[32mPASS\e[0m] %s\n" "$name"
