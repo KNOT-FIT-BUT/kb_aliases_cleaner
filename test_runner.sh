@@ -13,7 +13,7 @@ do
 
     if ! [ "$?" = "$(cat $test_case.rc)" ]
     then 
-        printf "[\e[31mFAIL\e[0m] %s\n" "$name" ": Wrong exit code"
+        printf "[\e[31mFAIL\e[0m] %s : Wrong exit code\n" "$name"
         rm -f "$out"
         continue
     fi
