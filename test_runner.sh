@@ -21,7 +21,9 @@ do
 
     if ! [ "$(cat "$out" | xargs)" = "$(cat "$test_case.out" | xargs)" ]
     then 
-        printf "[\e[31mFAIL\e[0m] %s\n" "$name" ": Output does not match"
+        printf "$(cat -n "$out" | xargs)"
+        printf "$(cat -n "$test_case.out" | xargs)"
+        printf "[\e[31mFAIL\e[0m] %s : Output does not match\n" "$name"
         rm -f "$out"
         continue
     fi
