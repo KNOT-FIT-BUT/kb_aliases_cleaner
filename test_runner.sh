@@ -9,7 +9,12 @@ do
     test_case="tests/$test_case/$test_case"
     touch $out
 
-    ./start.sh "$(cat $test_case.flags)" --input-file "$test_case.tsv" --output-file "$out"
+    if [ "$1" = "-v" ]
+    then
+        ./start.sh "$(cat $test_case.flags)" --debug --input-file "$test_case.tsv" --output-file "$out"
+    else
+        ./start.sh "$(cat $test_case.flags)" --debug --input-file "$test_case.tsv" --output-file "$out" > /dev/null
+    fi
 
     if ! [ "$?" = "$(cat $test_case.rc)" ]
     then 
