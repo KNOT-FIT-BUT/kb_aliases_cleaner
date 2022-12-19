@@ -114,6 +114,7 @@ if __name__ == "__main__":
     namegen_input = []
     for key in alias_dict:
         names = str(alias_dict[key]).split("\t")[2]
+        gender = ""
         for name in names.split("|"):
             try:
                 name, gender = name.split("#")
@@ -126,6 +127,8 @@ if __name__ == "__main__":
                     print(f"[!] No gender found for name: {name}")
             namegen_str = name + "\t\t" + "P:::" + gender + "\n"
             namegen_input.append(namegen_str)
+        namegen_alias_str = str(alias_dict[key].alias) + "\t\t" + "P:::" + gender + "\n"
+        namegen_input.append(namegen_alias_str)
 
     print("[*] Starting namegen and generating names")
     FNULL = open(os.devnull, "w")
