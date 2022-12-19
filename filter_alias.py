@@ -79,6 +79,7 @@ if __name__ == "__main__":
 
     match_alias.find_problematic_aliases(args["input_file"], alias_dict)
 
+
     print("[*] Getting aliases")
     aliases = set(alias_dict.keys())
     if not aliases:
@@ -112,6 +113,7 @@ if __name__ == "__main__":
 
     print("[*] Generating temporal input file for namegen")
     namegen_input = []
+
     for key in alias_dict:
         names = str(alias_dict[key]).split("\t")[2]
         gender = ""
