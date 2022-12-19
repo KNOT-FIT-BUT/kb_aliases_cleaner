@@ -105,7 +105,10 @@ def match_aliases(filename, aliases, aliases_dict, match_dict):
         ):
             line = line.split("\t")
             line[POS_MATCH_LINE] = str(idx)
-            if line[POS_TYPE] != "person":
+            try:
+                if line[POS_TYPE] != "person":
+                    continue
+            except IndexError:
                 continue
             mutated_aliases = aliases
             converted_line = convert_line_to_set(line)
